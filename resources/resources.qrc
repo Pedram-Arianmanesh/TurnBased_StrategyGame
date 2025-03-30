@@ -1,0 +1,14 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/splash.png</file>
+        <file>maps/grid1.txt</file>
+        <file>maps/grid2.txt</file>
+        <file>maps/grid3.txt</file>
+        <file>maps/grid4.txt</file>
+        <file>maps/grid5.txt</file>
+        <file>maps/grid6.txt</file>
+        <file>maps/grid7.txt</file>
+        <file>maps/grid8.txt</file>
+
+    </qresource>
+</RCC>

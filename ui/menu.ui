@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MenuPage</class>
- <widget class="QWidget" name="MenuPage">
+ <class>SplashPage</class>
+ <widget class="QWidget" name="SplashPage">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -80,13 +80,13 @@ QPushButton:hover {
 </string>
       </property>
       <property name="text">
-       <string>Play</string>
+       <string>Start Battle ⚔️</string>
       </property>
      </widget>
     </item>
    </layout>
   </widget>
-  <widget class="QLabel" name="MenuBackground">
+  <widget class="QLabel" name="SplashBackground">
    <property name="geometry">
     <rect>
      <x>0</x>
@@ -138,9 +138,44 @@ QPushButton:hover {
     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:36pt; font-weight:700;&quot;&gt;&lt;br/&gt;&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:36pt; font-weight:700;&quot;&gt;&lt;br/&gt;&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;br/&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;br/&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;br/&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;br/&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:36pt; font-weight:700;&quot;&gt;&lt;br/&gt;STRATEGIC&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:36pt; font-weight:700;&quot;&gt;BATTLEFIELD&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </widget>
-  <zorder>MenuBackground</zorder>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>590</x>
+     <y>510</y>
+     <width>761</width>
+     <height>221</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QLabel {
+    font-family: Ubuntu;
+    font-size: 36px;         /* Large font for visibility */
+    font-weight: bold;
+    color: white;            /* White text for contrast */
+    padding: 15px;           /* Spacing inside the label */
+    
+    /* Background: Subtle dark gradient for readability */
+    background: qlineargradient(
+        x1: 0, y1: 0,
+        x2: 1, y2: 1,
+        stop: 0 rgba(217, 43, 4, 0.8),  /* Fiery red */
+        stop: 1 rgba(25, 72, 206, 0.8)  /* Icy blue */
+    );
+
+    border-radius: 10px;  /* Rounded edges */
+    border: 2px solid white; /* Slight border for definition */
+    qproperty-alignment: 'AlignCenter'; /* Center the text */
+}</string>
+   </property>
+   <property name="text">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:26pt;&quot;&gt;Welcome to Strategic Battlefield!&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:18pt;&quot;&gt;Design your strategy, defeat rivals, and conquer the battlefield!&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+  </widget>
+  <zorder>SplashBackground</zorder>
   <zorder>verticalLayoutWidget</zorder>
   <zorder>Logo</zorder>
+  <zorder>label</zorder>
  </widget>
  <resources/>
  <connections/>

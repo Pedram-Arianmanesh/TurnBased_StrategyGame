@@ -2,24 +2,16 @@
 #define SPLASHSCREEN_H
 
 #include <QWidget>
+#include "ui_splashscreen.h"
 
-namespace Ui {
-class SplashScreen;
-}
-
-class SplashScreen : public QWidget
-{
+class SplashScreen : public QWidget {
     Q_OBJECT
 
 public:
     explicit SplashScreen(QWidget *parent = nullptr);
-    ~SplashScreen();
-
-signals:
-    void startClicked();
 
 private slots:
-    void onStartButtonClicked();
+    void goToMenu();
 
 private:
     Ui::SplashScreen *ui;

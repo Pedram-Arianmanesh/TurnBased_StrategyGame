@@ -37,7 +37,7 @@ set(PROJECT_SOURCES
 # فایل‌های UI
 set(UI_FILES
     src/splashscreen.ui
-    src/menu.ui
+    src/menupage.ui
     src/playerdialog.ui
 )
 

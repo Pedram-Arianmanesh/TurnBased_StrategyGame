@@ -1,21 +1,16 @@
 #include "splashscreen.h"
-#include "ui_splashscreen.h"
+#include "menupage.h"
 
 SplashScreen::SplashScreen(QWidget *parent)
-    : QWidget(parent)
-    , ui(new Ui::SplashScreen)
+    : QWidget(parent), ui(new Ui::SplashScreen)
 {
     ui->setupUi(this);
 
-    connect(ui->StartButton, &QPushButton::clicked, this, &SplashScreen::onStartButtonClicked);
+    connect(ui->StartButton, &QPushButton::clicked, this, &SplashScreen::goToMenu);
 }
 
-SplashScreen::~SplashScreen()
-{
-    delete ui;
-}
-
-void SplashScreen::onStartButtonClicked()
-{
-    emit startClicked();
+void SplashScreen::goToMenu() {
+    MenuPage *menu = new MenuPage();
+    menu->show();
+    this->close();  // بستن Splash
 }

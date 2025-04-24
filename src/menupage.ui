@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Menu</class>
- <widget class="QWidget" name="Menu">
+ <class>MenuPage</class>
+ <widget class="QWidget" name="MenuPage">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -46,7 +46,7 @@
      <number>5</number>
     </property>
     <item>
-     <widget class="QPushButton" name="StartPvP">
+     <widget class="QPushButton" name="StartPvPButton">
       <property name="styleSheet">
        <string notr="true">QPushButton {
     /* Diagonal gradient: red (top-left) -&gt; blue (bottom-right) */
@@ -110,7 +110,7 @@ QPushButton:pressed {
      </widget>
     </item>
     <item>
-     <widget class="QPushButton" name="Gallery">
+     <widget class="QPushButton" name="GalleryButton">
       <property name="styleSheet">
        <string notr="true">QPushButton {
     /* Diagonal gradient: red (top-left) -&gt; blue (bottom-right) */

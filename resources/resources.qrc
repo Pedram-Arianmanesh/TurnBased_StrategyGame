@@ -2,6 +2,7 @@
     <qresource prefix="/">
         <file>images/splash/splash1.png</file>
         <file>images/logo.png</file>
+        <file>images/menu.png</file>
         <file>maps/grid1.txt</file>
         <file>maps/grid2.txt</file>
         <file>maps/grid3.txt</file>

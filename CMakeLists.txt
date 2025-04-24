@@ -12,8 +12,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # منابع پروژه
 set(PROJECT_SOURCES
     src/main.cpp
-    src/mainwindow.cpp
-    src/mainwindow.h
+
+
     src/splashscreen.cpp
     src/splashscreen.h
     src/menupage.cpp
@@ -36,9 +36,9 @@ set(PROJECT_SOURCES
 
 # فایل‌های UI
 set(UI_FILES
-    ui/splash.ui
-    ui/menu.ui
-    ui/playerdialog.ui
+    src/splashscreen.ui
+    src/menu.ui
+    src/playerdialog.ui
 )
 
 # فایل منابع

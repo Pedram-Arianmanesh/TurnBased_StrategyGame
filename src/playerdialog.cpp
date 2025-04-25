@@ -1,5 +1,5 @@
 #include "playerdialog.h"
-#include "gamepage.h"
+#include <QMessageBox>
 
 PlayerDialog::PlayerDialog(QWidget *parent)
     : QDialog(parent), ui(new Ui::PlayerDialog)
@@ -19,8 +19,10 @@ QString PlayerDialog::player2Name() const {
 
 void PlayerDialog::onStartClicked()
 {
-    // اگر فیلدها خالی باشن می‌تونه پیام خطا بده ولی فعلاً فقط بریم به بازی
-    GamePage *game = new GamePage(nullptr, player1Name(), player2Name());
-    game->show();
+    if (player1Name().isEmpty() || player2Name().isEmpty()) {
+        QMessageBox::warning(this, "Warning!", "Enter both player's names!");
+        return;
+    }
+
     this->accept();
 }

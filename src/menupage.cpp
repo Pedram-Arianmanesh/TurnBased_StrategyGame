@@ -1,6 +1,8 @@
 #include "menupage.h"
 #include "playerdialog.h"
+#include "gamepage.h"
 #include <QMessageBox>
+
 
 MenuPage::MenuPage(QWidget *parent)
     : QWidget(parent), ui(new Ui::MenuPage)
@@ -19,9 +21,15 @@ void MenuPage::onGalleryClicked()
 
 void MenuPage::onStartPvPClicked()
 {
-    PlayerDialog *dialog = new PlayerDialog(this);
-    dialog->show();
-    this->close();
+    PlayerDialog dialog(this);
+
+    if (dialog.exec() == QDialog::Accepted) {
+        GamePage *game = new GamePage(nullptr,
+                                      dialog.player1Name(),
+                                      dialog.player2Name());
+        game->show();
+        this->close();
     }
+}
 
 

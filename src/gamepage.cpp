@@ -1,9 +1,16 @@
 #include "gamepage.h"
-#include <QMessageBox>
+#include <QVBoxLayout>
+#include <QLabel>
 
 GamePage::GamePage(QWidget *parent, const QString &player1, const QString &player2)
     : QWidget(parent)
 {
-    QMessageBox::information(this, "شروع بازی",
-                             QString("بازی بین %1 و %2 شروع شد!").arg(player1, player2));
+    setWindowTitle("Game Page");
+    QVBoxLayout *layout = new QVBoxLayout(this);
+
+    QLabel *label1 = new QLabel("Player 1: " + player1);
+    QLabel *label2 = new QLabel("Player 2: " + player2);
+
+    layout->addWidget(label1);
+    layout->addWidget(label2);
 }

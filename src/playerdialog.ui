@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>PlayerDialog</class>
+ <widget class="QDialog" name="PlayerDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1054</width>
+    <height>572</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Enter Player Names</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">
+QDialog {
+    /* Diagonal gradient: red (top-left) -&gt; blue (bottom-right) */
+    background: qlineargradient(
+        x1: 0, y1: 0,
+        x2: 1, y2: 1,
+        stop: 0 #D92B04, /* Strong red */
+        stop: 1 #1948CE  /* Deep blue */
+    );
+
+    /* Solid black border for contrast against bright gradient */
+    border: 2px solid #000000;
+    border-radius: 12px;        /* Slightly more rounded corners */
+
+    /* Text styling */
+    color: #FFFFFF;             /* White text for strong contrast */
+    font-family: Ubuntu;
+    font-size: 26px;            /* Larger, more readable font size */
+    font-weight: bold;          /* Makes text stand out */
+
+    /* Button sizing for 1920×1080 screens */
+    min-width: 320px;
+    min-height: 110px;
+    padding: 12px 24px;         /* Extra padding for a spacious feel */
+
+    /* Shadow effect to add depth */
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.6);
+}
+
+QPushButton:hover {
+    /* Slightly brighter gradient on hover for feedback */
+    background: qlineargradient(
+        x1: 0, y1: 0,
+        x2: 1, y2: 1,
+        stop: 0 #FC5C2A, /* Brighter red */
+        stop: 1 #2F6AF3  /* Brighter blue */
+    );
+
+    /* Outer glow effect */
+    border: 2px solid #FFFFFF;  /* Changes border color for glow effect */
+    box-shadow: 0px 0px 20px rgba(255, 255, 255, 0.8);
+}
+
+QPushButton:pressed {
+    /* Darkened gradient when pressed */
+    background: qlineargradient(
+        x1: 0, y1: 0,
+        x2: 1, y2: 1,
+        stop: 0 #A32000, /* Darker red */
+        stop: 1 #0F37A5  /* Darker blue */
+    );
+
+    /* Inner shadow effect to simulate pressing */
+    box-shadow: inset 4px 4px 8px rgba(0, 0, 0, 0.6);
+}
+</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QLineEdit" name="Player1LineEdit">
+     <property name="styleSheet">
+      <string notr="true">QLineEdit {
+    background: qlineargradient(
+        x1: 0, y1: 0,
+        x2: 1, y2: 1,
+        stop: 0 #D92B04,
+        stop: 1 #1948CE
+    );
+
+    border: 2px solid #FFFFFF;
+    border-radius: 10px;
+
+    color: #FFFFFF;
+    font-family: Ubuntu;
+    font-size: 22px;
+    font-weight: bold;
+    padding: 8px 12px;
+
+    selection-background-color: #FFFFFF;
+    selection-color: #000000;
+
+    min-height: 40px;
+
+    /* subtle inner shadow */
+    box-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+QLineEdit:focus {
+    border: 2px solid #FC5C2A; /* Highlight border when focused */
+    background: qlineargradient(
+        x1: 0, y1: 0,
+        x2: 1, y2: 1,
+        stop: 0 #FC5C2A,
+        stop: 1 #2F6AF3
+    );
+
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+}
+</string>
+     </property>
+     <property name="text">
+      <string>kj</string>
+     </property>
+     <property name="placeholderText">
+      <string>Player 1 Name</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLineEdit" name="Player2LineEdit">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QLineEdit {
+    background: qlineargradient(
+        x1: 0, y1: 0,
+        x2: 1, y2: 1,
+        stop: 0 #D92B04,
+        stop: 1 #1948CE
+    );
+
+    border: 2px solid #FFFFFF;
+    border-radius: 10px;
+
+    color: #FFFFFF;
+    font-family: Ubuntu;
+    font-size: 22px;
+    font-weight: bold;
+    padding: 8px 12px;
+
+    selection-background-color: #FFFFFF;
+    selection-color: #000000;
+
+    min-height: 40px;
+
+    /* subtle inner shadow */
+    box-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+QLineEdit:focus {
+    border: 2px solid #FC5C2A; /* Highlight border when focused */
+    background: qlineargradient(
+        x1: 0, y1: 0,
+        x2: 1, y2: 1,
+        stop: 0 #FC5C2A,
+        stop: 1 #2F6AF3
+    );
+
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+}
+</string>
+     </property>
+     <property name="placeholderText">
+      <string>Player 2 Name</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="StartButtonFinal">
+     <property name="text">
+      <string>Start Game</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

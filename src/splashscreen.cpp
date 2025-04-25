@@ -12,5 +12,5 @@ SplashScreen::SplashScreen(QWidget *parent)
 void SplashScreen::goToMenu() {
     MenuPage *menu = new MenuPage();
     menu->show();
-    this->close();  // بستن Splash
+    this->close();
 }

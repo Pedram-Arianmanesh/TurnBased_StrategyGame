@@ -19,8 +19,9 @@ void MenuPage::onGalleryClicked()
 
 void MenuPage::onStartPvPClicked()
 {
-    // نمونه ساده برای ادامه‌ی پروژه
-   // PlayerDialog *dialog = new PlayerDialog(this);
-    //dialog->exec();  // یا show()، بسته به طراحی
-}
+    PlayerDialog *dialog = new PlayerDialog(this);
+    dialog->show();
+    this->close();
+    }
+
 

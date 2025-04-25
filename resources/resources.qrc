@@ -1,6 +1,7 @@
 <RCC>
     <qresource prefix="/">
         <file>images/splash/splash1.png</file>
+        <file>images/splash/splash.gif</file>
         <file>images/logo.png</file>
         <file>images/menu.png</file>
         <file>maps/grid1.txt</file>

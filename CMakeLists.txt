@@ -55,6 +55,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         ${PROJECT_SOURCES}
         ${UI_FILES}
         ${RESOURCE_FILES}
+        src/logic/hexboardwidget.h src/logic/hexboardwidget.cpp
     )
 else()
     if(ANDROID)

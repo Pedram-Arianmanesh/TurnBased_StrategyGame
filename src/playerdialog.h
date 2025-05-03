@@ -19,4 +19,4 @@ private:
     Ui::PlayerDialog *ui;
 };
 
-#endif // PLAYERDIALOG_H
+#endif

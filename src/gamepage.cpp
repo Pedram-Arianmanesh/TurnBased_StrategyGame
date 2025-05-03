@@ -1,16 +1,33 @@
 #include "gamepage.h"
+#include "hexboardwidget.h"
 #include <QVBoxLayout>
-#include <QLabel>
+#include <QDebug>
 
-GamePage::GamePage(QWidget *parent, const QString &player1, const QString &player2)
-    : QWidget(parent)
+GamePage::GamePage(QWidget *parent,
+                   const QString &player1,
+                   const QString &player2)
+    : QWidget(parent),
+    m_player1(player1),
+    m_player2(player2)
 {
-    setWindowTitle("Game Page");
-    QVBoxLayout *layout = new QVBoxLayout(this);
-
-    QLabel *label1 = new QLabel("Player 1: " + player1);
-    QLabel *label2 = new QLabel("Player 2: " + player2);
-
-    layout->addWidget(label1);
-    layout->addWidget(label2);
+    setWindowTitle("Tactical Monsters - Game");
+    resize(1280, 800);
+    setupUI();
 }
+
+void GamePage::setupUI()
+{
+    Board board = BoardParser::parseBoard(":/maps/grid1.txt");
+
+    if (board.empty()) {
+        qWarning() << "❗ Board is empty. Check your map file path!";
+    }
+
+    HexBoardWidget *boardWidget = new HexBoardWidget(board, this);
+
+    QVBoxLayout *layout = new QVBoxLayout(this);
+    layout->addWidget(boardWidget);
+    setLayout(layout);
+}
+
+

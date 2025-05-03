@@ -15,7 +15,6 @@ MenuPage::MenuPage(QWidget *parent)
 
 void MenuPage::onGalleryClicked()
 {
-    // فعلاً یه پیام ساده؛ بعداً می‌تونه یه صفحه‌ی گالری اختصاصی باشه
     QMessageBox::information(this, "گالری", "گالری Agentها به‌زودی اضافه می‌شود!");
 }
 

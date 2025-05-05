@@ -22,9 +22,9 @@ This project is part of an **Advanced Programming Course**, focusing on building
 
 ## 🚀 Installation  
 1. **Clone the Repository:**  
-   ```bash  
-   git clone https://github.com/your-username/tactical-monsters.git  
-   cd tactical-monsters
+   ```bash
+   https://github.com/Pedram-Arianmanesh/TurnBased_StrategyGame.git
+   cd TurnBased_StrategyGame
 2. **Menu Screen:**
   PVP Game: Enter player names and start a match.
   Gallery: Placeholder screen (no agents yet).

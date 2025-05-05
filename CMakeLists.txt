@@ -39,6 +39,7 @@ set(UI_FILES
     src/splashscreen.ui
     src/menupage.ui
     src/playerdialog.ui
+    src/agentgallery.ui
 )
 
 # فایل منابع
@@ -56,6 +57,12 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         ${UI_FILES}
         ${RESOURCE_FILES}
         src/logic/hexboardwidget.h src/logic/hexboardwidget.cpp
+
+        src/agentgallery.h src/agentgallery.cpp src/agentgallery.ui
+
+
+
+
     )
 else()
     if(ANDROID)

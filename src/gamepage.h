@@ -2,8 +2,7 @@
 #define GAMEPAGE_H
 
 #include <QWidget>
-#include "cell.h"
-#include "boardparser.h"
+#include <QString>
 
 class GamePage : public QWidget
 {

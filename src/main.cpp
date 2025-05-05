@@ -1,11 +1,12 @@
-#include "splashscreen.h"
-
 #include <QApplication>
+#include "splashscreen.h"
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    SplashScreen splash;
-    splash.show();
+
+    SplashScreen* splash = new SplashScreen();
+    splash->show();
+
     return a.exec();
 }

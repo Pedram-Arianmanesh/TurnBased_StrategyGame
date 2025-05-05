@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>AgentGallery</class>
+ <widget class="QWidget" name="AgentGallery">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1920</width>
+    <height>1080</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Agent Gallery</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">
+    QWidget {
+        background-color: #121212;
+        color: white;
+    }
+    QLabel#TitleLabel {
+        font-size: 32px;
+        font-weight: bold;
+        color: white;
+        margin: 20px;
+    }
+    QScrollArea {
+        background-color: transparent;
+    }
+    QWidget#AgentCard {
+        background-color: #1E1E1E;
+        border-radius: 12px;
+        border: 2px solid #3949AB; /* رنگ آبی برای ظاهر */
+        padding: 10px;
+    }
+    QLabel {
+        font-size: 18px;
+    }
+   </string>
+  </property>
+  <layout class="QVBoxLayout" name="mainLayout">
+   <item>
+    <widget class="QLabel" name="TitleLabel">
+     <property name="text">
+      <string>Agent Gallery</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignHCenter|Qt::AlignTop</set>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QScrollArea" name="scrollArea">
+     <property name="widgetResizable">
+      <bool>true</bool>
+     </property>
+     <widget class="QWidget" name="scrollAreaWidgetContents">
+      <layout class="QGridLayout" name="gridLayout"/>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

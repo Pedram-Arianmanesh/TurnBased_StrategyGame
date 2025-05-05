@@ -12,4 +12,5 @@ public:
     static Board parseBoard(const QString &path);
 };
 
+
 #endif

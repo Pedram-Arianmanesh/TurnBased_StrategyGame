@@ -51,7 +51,7 @@ private:
 void GamePage::setupUI()
 {
     qDebug() << "⏳ Loading board...";
-    Board board = BoardParser::parseBoard(":/maps/grid1.txt");
+    Board board = BoardParser::parseBoard(":/maps/grid2.txt");
     qDebug() << "✅ Loaded board rows:" << board.size();
     if (board.empty()) {
         qWarning() << "❗ Board is empty. Check your map file path!";

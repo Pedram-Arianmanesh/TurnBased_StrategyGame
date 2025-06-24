@@ -2,9 +2,30 @@
     <qresource prefix="/">
         <file>images/splash/splash1.png</file>
         <file>images/splash/splash.gif</file>
-        <file>images/agents/warrior.png</file>
-        <file>images/agents/archer.png</file>
-        <file>images/agents/mage.png</file>
+        <file>images/agents/Billy.png</file>
+        <file>images/agents/Reketon.png</file>
+        <file>images/agents/Angus.png</file>
+        <file>images/agents/Duraham.png</file>
+        <file>images/agents/Colonel_Baba.png</file>
+        <file>images/agents/Medusa.png</file>
+        <file>images/agents/Bunka.png</file>
+        <file>images/agents/Sanka.png</file>
+        <file>images/agents/Sir_Lamorak.png</file>
+        <file>images/agents/Kabu.png</file>
+        <file>images/agents/Rajakal.png</file>
+        <file>images/agents/Salih.png</file>
+        <file>images/agents/Khan.png</file>
+        <file>images/agents/Boi.png</file>
+        <file>images/agents/Eloi.png</file>
+        <file>images/agents/Kanar.png</file>
+        <file>images/agents/Elsa.png</file>
+        <file>images/agents/Karissa.png</file>
+        <file>images/agents/Sir_Philip.png</file>
+        <file>images/agents/Frost.png</file>
+        <file>images/agents/Tusk.png</file>
+        <file>images/agents/Rambu.png</file>
+        <file>images/agents/Sabrina.png</file>
+        <file>images/agents/Death.png</file>
         <file>images/logo.png</file>
         <file>images/menu.png</file>
         <file>maps/grid1.txt</file>

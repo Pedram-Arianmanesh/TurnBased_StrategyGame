@@ -20,6 +20,8 @@ set(PROJECT_SOURCES
     src/menupage.h
     src/playerdialog.cpp
     src/playerdialog.h
+    src/agentcard.cpp
+    src/agentcard.h
     src/gamepage.cpp
     src/gamepage.h
     src/logic/cell.cpp
@@ -59,6 +61,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         src/logic/hexboardwidget.h src/logic/hexboardwidget.cpp
 
         src/agentgallery.h src/agentgallery.cpp src/agentgallery.ui
+
 
 
 

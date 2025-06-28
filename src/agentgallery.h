@@ -21,4 +21,4 @@ private:
     Ui::AgentGallery *ui;
 };
 
-#endif // AGENTGALLERY_H
+#endif

@@ -1,6 +1,9 @@
 #ifndef CELL_H
 #define CELL_H
 
+#include <vector>
+#include "agent.h"
+
 enum class TerrainType {
     Free,
     Water,
@@ -14,8 +17,13 @@ public:
     TerrainType terrain;
     int owner;
 
-    Cell();
+    std::vector<Cell*> neighbors;
+    bool visited = false;
+    Cell* parent = nullptr;
+    int distance = -1;
+    Agent* occupiedAgent = nullptr;
 
+    Cell();
     Cell(int r, int c, TerrainType t, int o = 0);
 };
 

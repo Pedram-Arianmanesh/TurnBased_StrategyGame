@@ -1,7 +1,6 @@
-// gamepage.cpp
 #include "gamepage.h"
 #include "boardparser.h"
-#include "hexboardwidget.h"
+#include "agentcard.h"
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QLabel>
@@ -11,106 +10,170 @@
 #include <QMimeData>
 #include <QMouseEvent>
 #include <QFrame>
+#include <QLayoutItem>
+#include <QDataStream>
+#include <QScrollArea>
+
+
+
 
 GamePage::GamePage(QWidget *parent, const QString &player1, const QString &player2)
-    : QWidget(parent), m_player1(player1), m_player2(player2)
+    : QWidget(parent), m_player1(player1), m_player2(player2),
+    m_gameBoard(nullptr), m_boardWidget(nullptr)
 {
     setWindowTitle("Tactical Monsters - Game");
     resize(1920, 1080);
     setupUI();
+    qDebug() << "GamePage initialized for players:" << m_player1 << "and" << m_player2;
 }
 
-class AgentCard : public QLabel {
-public:
-    explicit AgentCard(const QString &name, const QString &imgPath, QWidget *parent = nullptr)
-        : QLabel(parent), m_name(name) {
-        setPixmap(QPixmap(imgPath).scaled(100, 100, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-        setAlignment(Qt::AlignCenter);
-        setFixedSize(110, 110);
-        setStyleSheet("border: 2px solid gray; border-radius: 10px; background: white;");
-        setCursor(Qt::OpenHandCursor);
+GamePage::~GamePage()
+{
+    qDebug() << "GamePage destructor called.";
+    delete m_boardWidget;
+    delete m_gameBoard;
+
+    for (Agent* agentPrototype : m_player1AgentPrototypes) {
+        qDebug() << "Deleting Player 1 agent prototype:" << (agentPrototype ? agentPrototype->name() : "NULL Prototype");
+        delete agentPrototype;
     }
-
-protected:
-    void mousePressEvent(QMouseEvent *event) override {
-        if (event->button() == Qt::LeftButton) {
-            QDrag *drag = new QDrag(this);
-            QMimeData *mimeData = new QMimeData;
-            mimeData->setText(m_name);
-            drag->setMimeData(mimeData);
-            drag->setPixmap(pixmap());
-            drag->exec();
-        }
+    for (Agent* agentPrototype : m_player2AgentPrototypes) {
+        qDebug() << "Deleting Player 2 agent prototype:" << (agentPrototype ? agentPrototype->name() : "NULL Prototype");
+        delete agentPrototype;
     }
+    m_player1AgentPrototypes.clear();
+    m_player2AgentPrototypes.clear();
+    qDebug() << "All resources for GamePage cleaned up.";
+}
 
-
-private:
-    QString m_name;
-};
 
 void GamePage::setupUI()
 {
-    qDebug() << "⏳ Loading board...";
-    Board board = BoardParser::parseBoard(":/maps/grid2.txt");
-    qDebug() << "✅ Loaded board rows:" << board.size();
-    if (board.empty()) {
+    qDebug() << "GamePage: setupUI started.";
+    Board boardData = BoardParser::parseBoard(":/maps/grid2.txt");
+    qDebug() << "GamePage: Board parsed. Rows:" << boardData.size();
+    if (boardData.empty()) {
         qWarning() << "❗ Board is empty. Check your map file path!";
+        return;
     }
+
+    m_gameBoard = new GameBoard(boardData);
+    qDebug() << "GamePage: GameBoard created and neighbors set up.";
+
 
     QHBoxLayout *mainLayout = new QHBoxLayout(this);
 
+    std::vector<Agent*> allAgentPrototypes;
+    // Water Walking
+    allAgentPrototypes.push_back(new Water_Walking("Billy", QPixmap(":/images/agents/Billy.png"), 320, 3, 90, 1));
+    allAgentPrototypes.push_back(new Water_Walking("Reketon", QPixmap(":/images/agents/Reketon.png"), 320, 2, 80, 2));
+    allAgentPrototypes.push_back(new Water_Walking("Angus", QPixmap(":/images/agents/Angus.png"), 400, 2, 100, 1));
+    allAgentPrototypes.push_back(new Water_Walking("Duraham", QPixmap(":/images/agents/Duraham.png"), 320, 2, 100, 2));
+    allAgentPrototypes.push_back(new Water_Walking("Colonel_Baba", QPixmap(":/images/agents/Colonel_Baba.png"), 400, 2, 100, 1));
+    allAgentPrototypes.push_back(new Water_Walking("Medusa", QPixmap(":/images/agents/Medusa.png"), 320, 2, 90, 2));
+    allAgentPrototypes.push_back(new Water_Walking("Bunka", QPixmap(":/images/agents/Bunka.png"), 320, 3, 100, 1));
+    allAgentPrototypes.push_back(new Water_Walking("Sanka", QPixmap(":/images/agents/Sanka.png"), 320, 3, 100, 1));
+
+    // Grounded
+    allAgentPrototypes.push_back(new Grounded("Sir_Lamorak", QPixmap(":/images/agents/Sir_Lamorak.png"), 320, 3, 110, 1));
+    allAgentPrototypes.push_back(new Grounded("Kabu", QPixmap(":/images/agents/Kabu.png"), 400, 2, 120, 1));
+    allAgentPrototypes.push_back(new Grounded("Rajakal", QPixmap(":/images/agents/Rajakal.png"), 320, 2, 130, 1));
+    allAgentPrototypes.push_back(new Grounded("Salih", QPixmap(":/images/agents/Salih.png"), 400, 2, 80, 1));
+    allAgentPrototypes.push_back(new Grounded("Khan", QPixmap(":/images/agents/Khan.png"), 320, 2, 90, 1));
+    allAgentPrototypes.push_back(new Grounded("Boi", QPixmap(":/images/agents/Boi.png"), 400, 2, 100, 1));
+    allAgentPrototypes.push_back(new Grounded("Eloi", QPixmap(":/images/agents/Eloi.png"), 240, 2, 100, 2));
+    allAgentPrototypes.push_back(new Grounded("Kanar", QPixmap(":/images/agents/Kanar.png"), 160, 2, 100, 2));
+    allAgentPrototypes.push_back(new Grounded("Elsa", QPixmap(":/images/agents/Elsa.png"), 320, 2, 140, 2));
+    allAgentPrototypes.push_back(new Grounded("Karissa", QPixmap(":/images/agents/Karissa.png"), 280, 2, 80, 2));
+    allAgentPrototypes.push_back(new Grounded("Sir_Philip", QPixmap(":/images/agents/Sir_Philip.png"), 400, 2, 100, 1));
+    allAgentPrototypes.push_back(new Grounded("Frost", QPixmap(":/images/agents/Frost.png"), 260, 2, 80, 2));
+    allAgentPrototypes.push_back(new Grounded("Tusk", QPixmap(":/images/agents/Tusk.png"), 400, 2, 100, 1));
+
+    // Flying
+    allAgentPrototypes.push_back(new Flying("Rambu", QPixmap(":/images/agents/Rambu.png"), 320, 3, 120, 1));
+
+    // Floating
+    allAgentPrototypes.push_back(new Floating("Sabrina", QPixmap(":/images/agents/Sabrina.png"), 320, 3, 100, 1));
+    allAgentPrototypes.push_back(new Floating("Death", QPixmap(":/images/agents/Death.png"), 240, 3, 120, 2));
+
     // 1
-    QVBoxLayout *leftPanel = new QVBoxLayout;
+    QVBoxLayout *leftPanel = new QVBoxLayout(this);
     QLabel *player1Label = new QLabel(m_player1 + " [RED]");
     player1Label->setAlignment(Qt::AlignCenter);
     player1Label->setStyleSheet("background-color: #F44336; color: white; font-weight: bold; font-size: 18px; padding: 10px; border-radius: 8px;");
 
-    QVBoxLayout *player1Agents = new QVBoxLayout;
-    QStringList redAgents = {"warrior", "archer", "mage"};
-    for (const QString &name : redAgents) {
-        AgentCard *card = new AgentCard(name, ":/images/agents/" + name + ".png");
-        player1Agents->addWidget(card);
+    QVBoxLayout *player1AgentsLayout = new QVBoxLayout;
+    player1AgentsLayout->setAlignment(Qt::AlignHCenter);
+    player1AgentsLayout->addStretch();
+    m_player1AgentPrototypes = allAgentPrototypes;
+    qDebug() << "GamePage: Player 1 agent prototypes count:" << m_player1AgentPrototypes.size();
+    for (Agent* agentPrototype : m_player1AgentPrototypes) {
+        AgentCard *card = new AgentCard(agentPrototype, 1);
+        player1AgentsLayout->addWidget(card);
+        qDebug() << "GamePage: Added AgentCard for Player 1 prototype: " << (agentPrototype ? agentPrototype->name() : "NULL") << " at " << (void*)agentPrototype;
     }
+    player1AgentsLayout->addStretch();
 
     QFrame *leftFrame = new QFrame;
+    leftFrame->setObjectName("leftFrame");
     leftFrame->setStyleSheet("background-color: #FFEBEE; border-radius: 12px;");
-    leftFrame->setLayout(player1Agents);
-    leftFrame->setMinimumWidth(200);
+    leftFrame->setLayout(player1AgentsLayout);
+
+    QScrollArea *leftScrollArea = new QScrollArea;
+    leftScrollArea->setWidgetResizable(true);
+    leftScrollArea->setWidget(leftFrame);
+    leftScrollArea->setMinimumWidth(280);
+    leftScrollArea->setMaximumWidth(320);
+    leftScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
     leftPanel->addWidget(player1Label);
-    leftPanel->addWidget(leftFrame);
-    leftPanel->addStretch();
+    leftPanel->addWidget(leftScrollArea);
 
-    // board
-    HexBoardWidget *boardWidget = new HexBoardWidget(board);
-    boardWidget->setAcceptDrops(true);
 
     // 2
-    QVBoxLayout *rightPanel = new QVBoxLayout;
+    m_boardWidget = new HexBoardWidget(m_gameBoard, this);
+    m_boardWidget->setAcceptDrops(true);
+
+    qDebug() << "GamePage: HexBoardWidget::agentPlacedOnBoard signal will not be connected for card removal.";
+
+
+    // 3
+    QVBoxLayout *rightPanel = new QVBoxLayout(this);
     QLabel *player2Label = new QLabel(m_player2 + " [BLUE]");
     player2Label->setAlignment(Qt::AlignCenter);
     player2Label->setStyleSheet("background-color: #2196F3; color: white; font-weight: bold; font-size: 18px; padding: 10px; border-radius: 8px;");
 
-    QVBoxLayout *player2Agents = new QVBoxLayout;
-    QStringList blueAgents = {"warrior", "archer", "mage"};
-    for (const QString &name : blueAgents) {
-        AgentCard *card = new AgentCard(name, ":/images/agents/" + name + ".png");
-        player2Agents->addWidget(card);
+    QVBoxLayout *player2AgentsLayout = new QVBoxLayout;
+    player2AgentsLayout->setAlignment(Qt::AlignHCenter);
+    player2AgentsLayout->addStretch();
+    m_player2AgentPrototypes = allAgentPrototypes;
+    qDebug() << "GamePage: Player 2 agent prototypes count:" << m_player2AgentPrototypes.size();
+    for (Agent* agentPrototype : m_player2AgentPrototypes) {
+        AgentCard *card = new AgentCard(agentPrototype, 2);
+        player2AgentsLayout->addWidget(card);
+        qDebug() << "GamePage: Added AgentCard for Player 2 prototype: " << (agentPrototype ? agentPrototype->name() : "NULL") << " at " << (void*)agentPrototype;
     }
-
+    player2AgentsLayout->addStretch();
 
     QFrame *rightFrame = new QFrame;
+    rightFrame->setObjectName("rightFrame");
     rightFrame->setStyleSheet("background-color: #E3F2FD; border-radius: 12px;");
-    rightFrame->setLayout(player2Agents);
-    rightFrame->setMinimumWidth(200);
+    rightFrame->setLayout(player2AgentsLayout);
+
+    QScrollArea *rightScrollArea = new QScrollArea;
+    rightScrollArea->setWidgetResizable(true);
+    rightScrollArea->setWidget(rightFrame);
+    rightScrollArea->setMinimumWidth(280);
+    rightScrollArea->setMaximumWidth(320);
+    rightScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
     rightPanel->addWidget(player2Label);
-    rightPanel->addWidget(rightFrame);
-    rightPanel->addStretch();
+    rightPanel->addWidget(rightScrollArea);
 
-    mainLayout->addLayout(leftPanel, 2);
-    mainLayout->addWidget(boardWidget, 6);
-    mainLayout->addLayout(rightPanel, 2);
+    mainLayout->addLayout(leftPanel, 3);
+    mainLayout->addWidget(m_boardWidget, 4);
+    mainLayout->addLayout(rightPanel, 3);
 
     setLayout(mainLayout);
+    qDebug() << "GamePage: setupUI finished.";
 }

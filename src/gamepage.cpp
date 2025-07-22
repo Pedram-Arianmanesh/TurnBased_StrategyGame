@@ -13,7 +13,8 @@
 #include <QLayoutItem>
 #include <QDataStream>
 #include <QScrollArea>
-
+#include <cstdlib>
+#include <ctime>
 
 
 
@@ -49,8 +50,38 @@ GamePage::~GamePage()
 
 void GamePage::setupUI()
 {
+    QString filePath;
+    std::srand(std::time(nullptr));
+    int randomNumber = std::rand() % 8 + 1;
+    switch (randomNumber) {
+    case 1:
+        filePath = ":/maps/grid1.txt";
+        break;
+    case 2:
+        filePath = ":/maps/grid2.txt";
+        break;
+    case 3:
+        filePath = ":/maps/grid3.txt";
+        break;
+    case 4:
+        filePath = ":/maps/grid4.txt";
+        break;
+    case 5:
+        filePath = ":/maps/grid5.txt";
+        break;
+    case 6:
+        filePath = ":/maps/grid6.txt";
+        break;
+    case 7:
+        filePath = ":/maps/grid7.txt";
+        break;
+    case 8:
+        filePath = ":/maps/grid8.txt";
+        break;
+    }
+
     qDebug() << "GamePage: setupUI started.";
-    Board boardData = BoardParser::parseBoard(":/maps/grid2.txt");
+    Board boardData = BoardParser::parseBoard(filePath);
     qDebug() << "GamePage: Board parsed. Rows:" << boardData.size();
     if (boardData.empty()) {
         qWarning() << "❗ Board is empty. Check your map file path!";

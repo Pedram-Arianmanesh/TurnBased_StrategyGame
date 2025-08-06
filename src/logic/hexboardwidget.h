@@ -2,13 +2,15 @@
 #define HEXBOARDWIDGET_H
 
 #include <QWidget>
-#include <QMap>
-#include "logic/gameboard.h"
-#include "logic/cell.h"
-#include "logic/agent.h"
-
-class QDragEnterEvent;
-class QDropEvent;
+#include <QPointF>
+#include <utility>
+class GameBoard;
+class Cell;
+class Agent;
+class Water_Walking;
+class Grounded;
+class Flying;
+class Floating;
 
 class HexBoardWidget : public QWidget
 {
@@ -27,10 +29,7 @@ protected:
 
 private:
     GameBoard* m_gameBoard;
-
     std::pair<int, int> pointToCell(const QPointF &pt) const;
-
-
     Agent* createAgentInstance(const QString& agentTypeName, int playerOwner);
 };
 

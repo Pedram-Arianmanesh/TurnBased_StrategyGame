@@ -4,28 +4,25 @@
 #include <QWidget>
 #include <QString>
 #include <vector>
-
-#include "logic/gameboard.h"
-#include "hexboardwidget.h"
-#include "logic/agent.h"
-#include "agentcard.h"
-
-namespace Ui {
-class GamePage;
-}
-
+#include <QList>
+class GameBoard;
+class HexBoardWidget;
+class Agent;
+class AgentCard;
+class QVBoxLayout;
 class GamePage : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit GamePage(QWidget *parent = nullptr, const QString &player1 = "", const QString &player2 = "");
+    explicit GamePage(QWidget *parent = nullptr, const QString &player1 = "Player 1", const QString &player2 = "Player 2");
     ~GamePage();
 
-
+private slots:
+    void handleAgentPlaced(const QString& agentTypeName, int playerOwner);
 
 private:
-    Ui::GamePage *ui;
+    void setupUI();
 
     QString m_player1;
     QString m_player2;
@@ -33,12 +30,14 @@ private:
     GameBoard* m_gameBoard;
     HexBoardWidget* m_boardWidget;
 
+    QVBoxLayout* m_player1AgentsLayout = nullptr;
+    QVBoxLayout* m_player2AgentsLayout = nullptr;
+
+    QList<AgentCard*> m_player1AgentCards;
+    QList<AgentCard*> m_player2AgentCards;
 
     std::vector<Agent*> m_player1AgentPrototypes;
     std::vector<Agent*> m_player2AgentPrototypes;
-
-    void setupUI();
-
 };
 
 #endif

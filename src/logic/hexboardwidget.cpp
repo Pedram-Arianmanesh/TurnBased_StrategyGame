@@ -1,4 +1,6 @@
 #include "hexboardwidget.h"
+#include "logic/gameboard.h"
+#include "logic/cell.h"
 #include <QPainter>
 #include <QPolygonF>
 #include <QDragEnterEvent>
@@ -18,7 +20,7 @@ HexBoardWidget::HexBoardWidget(GameBoard* gameBoard, QWidget *parent)
 }
 
 Agent* HexBoardWidget::createAgentInstance(const QString& agentTypeName, int playerOwner) {
-    qDebug() << "createAgentInstance: Attempting to create instance for type:" << agentTypeName << "owner:" << playerOwner; //
+    qDebug() << "createAgentInstance: Attempting to create instance for type:" << agentTypeName << "owner:" << playerOwner;
 
     // Water Walking
     if (agentTypeName == "Billy") { return new Water_Walking("Billy", QPixmap(":/images/agents/Billy.png"), 320, 3, 90, 1); }
@@ -52,7 +54,7 @@ Agent* HexBoardWidget::createAgentInstance(const QString& agentTypeName, int pla
     else if (agentTypeName == "Sabrina") { return new Floating("Sabrina", QPixmap(":/images/agents/Sabrina.png"), 320, 3, 100, 1); }
     else if (agentTypeName == "Death") { return new Floating("Death", QPixmap(":/images/agents/Death.png"), 240, 3, 120, 2); }
     else {
-        qWarning() << "createAgentInstance: Unknown agent type requested:" << agentTypeName; //
+        qWarning() << "createAgentInstance: Unknown agent type requested:" << agentTypeName;
         return nullptr;
     }
 }
@@ -205,7 +207,7 @@ void HexBoardWidget::dropEvent(QDropEvent *event)
             m_gameBoard->placeAgent(newAgentInstance, row, col);
             update();
             event->acceptProposedAction();
-            qDebug() << "HexBoardWidget: Agent placed successfully. Emitting agentPlacedOnBoard signal (type only).";
+            qDebug() << "HexBoardWidget: Agent placed successfully. Emitting agentPlacedOnBoard signal.";
             emit agentPlacedOnBoard(agentTypeName, playerOwner);
         } else {
             qDebug() << "HexBoardWidget: Invalid placement for agent type" << agentTypeName << " at (" << row << "," << col << ") for player" << playerOwner;

@@ -4,6 +4,10 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QDrag>
+#include <QMimeData>
+#include <QMouseEvent>
+#include <QDataStream>
 
 AgentCard::AgentCard(Agent* agentPrototype, int playerOwner, QWidget *parent)
     : QLabel(parent), m_agentPrototype(agentPrototype), m_playerOwner(playerOwner) {

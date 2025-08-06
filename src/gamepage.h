@@ -26,6 +26,7 @@ private slots:
     void handleAgentPlaced(const QString& agentTypeName, int playerOwner);
     void updatePlayerLabels();
     void updateBoardDisplay();
+    void handleMoveAgentRequested(int fromRow, int fromCol, int toRow, int toCol);
 
 private:
     void setupUI();

@@ -87,38 +87,38 @@ void GamePage::setupUI()
 
     std::vector<Agent*> allAgentPrototypes;
     // Water Walking
-    allAgentPrototypes.push_back(new Water_Walking("Billy", QPixmap(":/images/agents/Billy.png"), 320, 3, 90, 1));
-    allAgentPrototypes.push_back(new Water_Walking("Reketon", QPixmap(":/images/agents/Reketon.png"), 320, 2, 80, 2));
-    allAgentPrototypes.push_back(new Water_Walking("Angus", QPixmap(":/images/agents/Angus.png"), 400, 2, 100, 1));
-    allAgentPrototypes.push_back(new Water_Walking("Duraham", QPixmap(":/images/agents/Duraham.png"), 320, 2, 100, 2));
-    allAgentPrototypes.push_back(new Water_Walking("Colonel_Baba", QPixmap(":/images/agents/Colonel_Baba.png"), 400, 2, 100, 1));
-    allAgentPrototypes.push_back(new Water_Walking("Medusa", QPixmap(":/images/agents/Medusa.png"), 320, 2, 90, 2));
-    allAgentPrototypes.push_back(new Water_Walking("Bunka", QPixmap(":/images/agents/Bunka.png"), 320, 3, 100, 1));
-    allAgentPrototypes.push_back(new Water_Walking("Sanka", QPixmap(":/images/agents/Sanka.png"), 320, 3, 100, 1));
+    allAgentPrototypes.push_back(new Water_Walking("Billy", QPixmap(":/images/agents/Billy.png"), 320, 3, 90, 1, 0));
+    allAgentPrototypes.push_back(new Water_Walking("Reketon", QPixmap(":/images/agents/Reketon.png"), 320, 2, 80, 2, 0));
+    allAgentPrototypes.push_back(new Water_Walking("Angus", QPixmap(":/images/agents/Angus.png"), 400, 2, 100, 1, 0));
+    allAgentPrototypes.push_back(new Water_Walking("Duraham", QPixmap(":/images/agents/Duraham.png"), 320, 2, 100, 2, 0));
+    allAgentPrototypes.push_back(new Water_Walking("Colonel_Baba", QPixmap(":/images/agents/Colonel_Baba.png"), 400, 2, 100, 1, 0));
+    allAgentPrototypes.push_back(new Water_Walking("Medusa", QPixmap(":/images/agents/Medusa.png"), 320, 2, 90, 2, 0));
+    allAgentPrototypes.push_back(new Water_Walking("Bunka", QPixmap(":/images/agents/Bunka.png"), 320, 3, 100, 1, 0));
+    allAgentPrototypes.push_back(new Water_Walking("Sanka", QPixmap(":/images/agents/Sanka.png"), 320, 3, 100, 1, 0));
 
     // Grounded
-    allAgentPrototypes.push_back(new Grounded("Sir_Lamorak", QPixmap(":/images/agents/Sir_Lamorak.png"), 320, 3, 110, 1));
-    allAgentPrototypes.push_back(new Grounded("Kabu", QPixmap(":/images/agents/Kabu.png"), 400, 2, 120, 1));
-    allAgentPrototypes.push_back(new Grounded("Rajakal", QPixmap(":/images/agents/Rajakal.png"), 320, 2, 130, 1));
-    allAgentPrototypes.push_back(new Grounded("Salih", QPixmap(":/images/agents/Salih.png"), 400, 2, 80, 1));
-    allAgentPrototypes.push_back(new Grounded("Khan", QPixmap(":/images/agents/Khan.png"), 320, 2, 90, 1));
-    allAgentPrototypes.push_back(new Grounded("Boi", QPixmap(":/images/agents/Boi.png"), 400, 2, 100, 1));
-    allAgentPrototypes.push_back(new Grounded("Eloi", QPixmap(":/images/agents/Eloi.png"), 240, 2, 100, 2));
-    allAgentPrototypes.push_back(new Grounded("Kanar", QPixmap(":/images/agents/Kanar.png"), 160, 2, 100, 2));
-    allAgentPrototypes.push_back(new Grounded("Elsa", QPixmap(":/images/agents/Elsa.png"), 320, 2, 140, 2));
-    allAgentPrototypes.push_back(new Grounded("Karissa", QPixmap(":/images/agents/Karissa.png"), 280, 2, 80, 2));
-    allAgentPrototypes.push_back(new Grounded("Sir_Philip", QPixmap(":/images/agents/Sir_Philip.png"), 400, 2, 100, 1));
-    allAgentPrototypes.push_back(new Grounded("Frost", QPixmap(":/images/agents/Frost.png"), 260, 2, 80, 2));
-    allAgentPrototypes.push_back(new Grounded("Tusk", QPixmap(":/images/agents/Tusk.png"), 400, 2, 100, 1));
+    allAgentPrototypes.push_back(new Grounded("Sir_Lamorak", QPixmap(":/images/agents/Sir_Lamorak.png"), 320, 3, 110, 1, 0));
+    allAgentPrototypes.push_back(new Grounded("Kabu", QPixmap(":/images/agents/Kabu.png"), 400, 2, 120, 1, 0));
+    allAgentPrototypes.push_back(new Grounded("Rajakal", QPixmap(":/images/agents/Rajakal.png"), 320, 2, 130, 1, 0));
+    allAgentPrototypes.push_back(new Grounded("Salih", QPixmap(":/images/agents/Salih.png"), 400, 2, 80, 1, 0));
+    allAgentPrototypes.push_back(new Grounded("Khan", QPixmap(":/images/agents/Khan.png"), 320, 2, 90, 1, 0));
+    allAgentPrototypes.push_back(new Grounded("Boi", QPixmap(":/images/agents/Boi.png"), 400, 2, 100, 1, 0));
+    allAgentPrototypes.push_back(new Grounded("Eloi", QPixmap(":/images/agents/Eloi.png"), 240, 2, 100, 2, 0));
+    allAgentPrototypes.push_back(new Grounded("Kanar", QPixmap(":/images/agents/Kanar.png"), 160, 2, 100, 2, 0));
+    allAgentPrototypes.push_back(new Grounded("Elsa", QPixmap(":/images/agents/Elsa.png"), 320, 2, 140, 2, 0));
+    allAgentPrototypes.push_back(new Grounded("Karissa", QPixmap(":/images/agents/Karissa.png"), 280, 2, 80, 2, 0));
+    allAgentPrototypes.push_back(new Grounded("Sir_Philip", QPixmap(":/images/agents/Sir_Philip.png"), 400, 2, 100, 1, 0));
+    allAgentPrototypes.push_back(new Grounded("Frost", QPixmap(":/images/agents/Frost.png"), 260, 2, 80, 2, 0));
+    allAgentPrototypes.push_back(new Grounded("Tusk", QPixmap(":/images/agents/Tusk.png"), 400, 2, 100, 1, 0));
 
     // Flying
-    allAgentPrototypes.push_back(new Flying("Rambu", QPixmap(":/images/agents/Rambu.png"), 320, 3, 120, 1));
+    allAgentPrototypes.push_back(new Flying("Rambu", QPixmap(":/images/agents/Rambu.png"), 320, 3, 120, 1, 0));
 
     // Floating
-    allAgentPrototypes.push_back(new Floating("Sabrina", QPixmap(":/images/agents/Sabrina.png"), 320, 3, 100, 1));
-    allAgentPrototypes.push_back(new Floating("Death", QPixmap(":/images/agents/Death.png"), 240, 3, 120, 2));
+    allAgentPrototypes.push_back(new Floating("Sabrina", QPixmap(":/images/agents/Sabrina.png"), 320, 3, 100, 1, 0));
+    allAgentPrototypes.push_back(new Floating("Death", QPixmap(":/images/agents/Death.png"), 240, 3, 120, 2, 0));
 
-    // Player 1
+    // Left Panel for Player 1
     QVBoxLayout *leftPanel = new QVBoxLayout(this);
     m_player1Label = new QLabel(m_player1);
     m_player1Label->setAlignment(Qt::AlignCenter);
@@ -153,14 +153,15 @@ void GamePage::setupUI()
     leftPanel->addWidget(leftScrollArea);
 
 
-    // Board
+    // HexBoardWidget (Board)
     m_boardWidget = new HexBoardWidget(m_gameBoard, this);
     m_boardWidget->setAcceptDrops(true);
     connect(m_boardWidget, &HexBoardWidget::agentPlacedOnBoard, this, &GamePage::handleAgentPlaced);
+    connect(m_boardWidget, &HexBoardWidget::moveAgentRequested, this, &GamePage::handleMoveAgentRequested);
     m_boardWidget->setGameState(m_gameState);
     qDebug() << "GamePage: HexBoardWidget::agentPlacedOnBoard signal is NOW connected for card removal.";
 
-    // Player 2
+    // Right Panel for Player 2
     QVBoxLayout *rightPanel = new QVBoxLayout(this);
     m_player2Label = new QLabel(m_player2);
     m_player2Label->setAlignment(Qt::AlignCenter);
@@ -245,11 +246,10 @@ void GamePage::handleAgentPlaced(const QString& agentTypeName, int playerOwner) 
 
             m_gameState->agentPlaced(playerOwner);
             updatePlayerLabels();
-            updateBoardDisplay();
 
             if (m_gameState->getCurrentPhase() == GamePhase::Combat) {
                 m_gameBoard->clearStartZones();
-                m_boardWidget->update();
+                updateBoardDisplay();
             }
         } else {
             qWarning() << "GamePage: Could not find AgentCard for agent:" << agentTypeName << " in player" << playerOwner << " list.";
@@ -260,11 +260,13 @@ void GamePage::handleAgentPlaced(const QString& agentTypeName, int playerOwner) 
 }
 
 void GamePage::updatePlayerLabels() {
+    QString phaseText = m_gameState->getCurrentPhase() == GamePhase::Deployment ? " (Deployment)" : " (Combat)";
+    QString turnText = QString(" - Turn: %1").arg(m_gameState->getCurrentPlayer() == 1 ? m_player1 : m_player2);
     QString player1Text = QString("%1 (%2/5)").arg(m_player1).arg(m_gameState->getPlayerPlacedAgents(1));
     QString player2Text = QString("%1 (%2/5)").arg(m_player2).arg(m_gameState->getPlayerPlacedAgents(2));
 
-    m_player1Label->setText(player1Text);
-    m_player2Label->setText(player2Text);
+    m_player1Label->setText(player1Text + (m_gameState->getCurrentPlayer() == 1 ? phaseText + turnText : ""));
+    m_player2Label->setText(player2Text + (m_gameState->getCurrentPlayer() == 2 ? phaseText + turnText : ""));
 
     m_player1Label->setStyleSheet(m_gameState->getCurrentPlayer() == 1 ? "border: 3px solid white; border-radius: 8px; background-color: #F44336; color: white; font-weight: bold; font-size: 18px; padding: 10px;" : "border: 3px solid transparent; border-radius: 8px; background-color: #F44336; color: white; font-weight: bold; font-size: 18px; padding: 10px;");
     m_player2Label->setStyleSheet(m_gameState->getCurrentPlayer() == 2 ? "border: 3px solid white; border-radius: 8px; background-color: #2196F3; color: white; font-weight: bold; font-size: 18px; padding: 10px;" : "border: 3px solid transparent; border-radius: 8px; background-color: #2196F3; color: white; font-weight: bold; font-size: 18px; padding: 10px;");
@@ -274,4 +276,27 @@ void GamePage::updateBoardDisplay() {
     if (m_boardWidget) {
         m_boardWidget->update();
     }
+}
+
+void GamePage::handleMoveAgentRequested(int fromRow, int fromCol, int toRow, int toCol) {
+    if (m_gameState->getCurrentPhase() != GamePhase::Combat) {
+        qWarning() << "Cannot move agents outside of combat phase!";
+        return;
+    }
+
+    Cell* fromCell = m_gameBoard->getCell(fromRow, fromCol);
+    if (!fromCell || !fromCell->occupiedAgent) {
+        qWarning() << "Invalid move request: no agent at start cell.";
+        return;
+    }
+
+    if (fromCell->occupiedAgent->getOwner() != m_gameState->getCurrentPlayer()) {
+        qWarning() << "It's not your turn to move this agent.";
+        return;
+    }
+
+    m_gameBoard->moveAgent(fromCell->occupiedAgent, fromRow, fromCol, toRow, toCol);
+    m_gameState->nextTurn();
+    updateBoardDisplay();
+    updatePlayerLabels();
 }

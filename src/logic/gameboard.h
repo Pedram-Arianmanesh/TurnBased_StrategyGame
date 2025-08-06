@@ -22,6 +22,8 @@ public:
 
     void resetBfsState();
 
+    std::vector<Cell*> getReachableCells(Cell* startCell, int mobility, int playerOwner);
+
     int getRows() const { return m_cells.size(); }
     int getCols(int r) const { return m_cells[r].size(); }
 

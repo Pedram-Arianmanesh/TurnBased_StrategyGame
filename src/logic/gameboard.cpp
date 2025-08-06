@@ -1,5 +1,6 @@
 #include "gameboard.h"
 #include <QDebug>
+#include <QQueue>
 
 GameBoard::GameBoard(const Board& parsedBoard)
     : m_cells(parsedBoard)
@@ -13,23 +14,25 @@ void GameBoard::setupNeighbors() {
             Cell* currentCell = &m_cells[r][c];
             currentCell->neighbors.clear();
 
-            if (getCell(r, c + 1)) currentCell->neighbors.push_back(getCell(r, c + 1));
-            if (getCell(r, c - 1)) currentCell->neighbors.push_back(getCell(r, c - 1));
+            if (getCell(r - 1, c)) currentCell->neighbors.push_back(getCell(r - 1, c));
+            if (getCell(r + 1, c)) currentCell->neighbors.push_back(getCell(r + 1, c));
 
             if (r % 2 == 0) {
+                if (getCell(r, c - 1)) currentCell->neighbors.push_back(getCell(r, c - 1));
+                if (getCell(r, c + 1)) currentCell->neighbors.push_back(getCell(r, c + 1));
                 if (getCell(r - 1, c - 1)) currentCell->neighbors.push_back(getCell(r - 1, c - 1));
-                if (getCell(r - 1, c)) currentCell->neighbors.push_back(getCell(r - 1, c));
                 if (getCell(r + 1, c - 1)) currentCell->neighbors.push_back(getCell(r + 1, c - 1));
-                if (getCell(r + 1, c)) currentCell->neighbors.push_back(getCell(r + 1, c));
             } else {
-                if (getCell(r - 1, c)) currentCell->neighbors.push_back(getCell(r - 1, c));
+                if (getCell(r, c - 1)) currentCell->neighbors.push_back(getCell(r, c - 1));
+                if (getCell(r, c + 1)) currentCell->neighbors.push_back(getCell(r, c + 1));
                 if (getCell(r - 1, c + 1)) currentCell->neighbors.push_back(getCell(r - 1, c + 1));
-                if (getCell(r + 1, c)) currentCell->neighbors.push_back(getCell(r + 1, c));
                 if (getCell(r + 1, c + 1)) currentCell->neighbors.push_back(getCell(r + 1, c + 1));
             }
         }
     }
 }
+
+
 
 Cell* GameBoard::getCell(int row, int col) {
     if (row >= 0 && (size_t)row < m_cells.size()) {
@@ -107,4 +110,48 @@ void GameBoard::resetBfsState() {
             m_cells[r][c].distance = -1;
         }
     }
+}
+
+std::vector<Cell*> GameBoard::getReachableCells(Cell* startCell, int mobility, int playerOwner) {
+    resetBfsState();
+
+    std::vector<Cell*> reachableCells;
+    QQueue<Cell*> q;
+
+    startCell->distance = 0;
+    startCell->visited = true;
+    q.enqueue(startCell);
+
+    while (!q.isEmpty()) {
+        Cell* currentCell = q.dequeue();
+
+        if (currentCell->distance < mobility) {
+            for (Cell* neighbor : currentCell->neighbors) {
+
+                if (!neighbor->visited && !neighbor->occupiedAgent && (neighbor->owner != playerOwner)) {
+                    bool canMoveToNeighbor = false;
+
+                    if (startCell->occupiedAgent->type() == "Grounded" && neighbor->terrain == TerrainType::Free) {
+                        canMoveToNeighbor = true;
+                    } else if (startCell->occupiedAgent->type() == "Water_Walking" && (neighbor->terrain == TerrainType::Free || neighbor->terrain == TerrainType::Water)) {
+                        canMoveToNeighbor = true;
+                    } else if (startCell->occupiedAgent->type() == "Flying" && (neighbor->terrain == TerrainType::Free || neighbor->terrain == TerrainType::Water || neighbor->terrain == TerrainType::Rock)) {
+                        canMoveToNeighbor = true;
+                    } else if (startCell->occupiedAgent->type() == "Floating" && (neighbor->terrain == TerrainType::Free || neighbor->terrain == TerrainType::Water || neighbor->terrain == TerrainType::Rock)) {
+                        canMoveToNeighbor = true;
+                    }
+
+                    if (canMoveToNeighbor) {
+                        neighbor->visited = true;
+                        neighbor->distance = currentCell->distance + 1;
+                        neighbor->parent = currentCell;
+                        q.enqueue(neighbor);
+                        reachableCells.push_back(neighbor);
+                    }
+                }
+            }
+        }
+    }
+
+    return reachableCells;
 }

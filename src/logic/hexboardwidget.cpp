@@ -10,7 +10,9 @@
 #include <cmath>
 #include <QDebug>
 #include <QDataStream>
+#include <QMouseEvent>
 #include "logic/agent.h"
+#include <algorithm>
 
 HexBoardWidget::HexBoardWidget(GameBoard* gameBoard, QWidget *parent)
     : QWidget(parent), m_gameBoard(gameBoard), m_gameState(nullptr)
@@ -27,43 +29,38 @@ void HexBoardWidget::setGameState(GameState* gameState) {
 Agent* HexBoardWidget::createAgentInstance(const QString& agentTypeName, int playerOwner) {
     qDebug() << "createAgentInstance: Attempting to create instance for type:" << agentTypeName << "owner:" << playerOwner;
 
-    // Water Walking
-    if (agentTypeName == "Billy") { return new Water_Walking("Billy", QPixmap(":/images/agents/Billy.png"), 320, 3, 90, 1); }
-    else if (agentTypeName == "Reketon") { return new Water_Walking("Reketon", QPixmap(":/images/agents/Reketon.png"), 320, 2, 80, 2); }
-    else if (agentTypeName == "Angus") { return new Water_Walking("Angus", QPixmap(":/images/agents/Angus.png"), 400, 2, 100, 1); }
-    else if (agentTypeName == "Duraham") { return new Water_Walking("Duraham", QPixmap(":/images/agents/Duraham.png"), 320, 2, 100, 2); }
-    else if (agentTypeName == "Colonel_Baba") { return new Water_Walking("Colonel_Baba", QPixmap(":/images/agents/Colonel_Baba.png"), 400, 2, 100, 1); }
-    else if (agentTypeName == "Medusa") { return new Water_Walking("Medusa", QPixmap(":/images/agents/Medusa.png"), 320, 2, 90, 2); }
-    else if (agentTypeName == "Bunka") { return new Water_Walking("Bunka", QPixmap(":/images/agents/Bunka.png"), 320, 3, 100, 1); }
-    else if (agentTypeName == "Sanka") { return new Water_Walking("Sanka", QPixmap(":/images/agents/Sanka.png"), 320, 3, 100, 1); }
+    if (agentTypeName == "Billy") { return new Water_Walking("Billy", QPixmap(":/images/agents/Billy.png"), 320, 3, 90, 1, playerOwner); }
+    else if (agentTypeName == "Reketon") { return new Water_Walking("Reketon", QPixmap(":/images/agents/Reketon.png"), 320, 2, 80, 2, playerOwner); }
+    else if (agentTypeName == "Angus") { return new Water_Walking("Angus", QPixmap(":/images/agents/Angus.png"), 400, 2, 100, 1, playerOwner); }
+    else if (agentTypeName == "Duraham") { return new Water_Walking("Duraham", QPixmap(":/images/agents/Duraham.png"), 320, 2, 100, 2, playerOwner); }
+    else if (agentTypeName == "Colonel_Baba") { return new Water_Walking("Colonel_Baba", QPixmap(":/images/agents/Colonel_Baba.png"), 400, 2, 100, 1, playerOwner); }
+    else if (agentTypeName == "Medusa") { return new Water_Walking("Medusa", QPixmap(":/images/agents/Medusa.png"), 320, 2, 90, 2, playerOwner); }
+    else if (agentTypeName == "Bunka") { return new Water_Walking("Bunka", QPixmap(":/images/agents/Bunka.png"), 320, 3, 100, 1, playerOwner); }
+    else if (agentTypeName == "Sanka") { return new Water_Walking("Sanka", QPixmap(":/images/agents/Sanka.png"), 320, 3, 100, 1, playerOwner); }
 
-    // Grounded
-    else if (agentTypeName == "Sir_Lamorak") { return new Grounded("Sir_Lamorak", QPixmap(":/images/agents/Sir_Lamorak.png"), 320, 3, 110, 1); }
-    else if (agentTypeName == "Kabu") { return new Grounded("Kabu", QPixmap(":/images/agents/Kabu.png"), 400, 2, 120, 1); }
-    else if (agentTypeName == "Rajakal") { return new Grounded("Rajakal", QPixmap(":/images/agents/Rajakal.png"), 320, 2, 130, 1); }
-    else if (agentTypeName == "Salih") { return new Grounded("Salih", QPixmap(":/images/agents/Salih.png"), 400, 2, 80, 1); }
-    else if (agentTypeName == "Khan") { return new Grounded("Khan", QPixmap(":/images/agents/Khan.png"), 320, 2, 90, 1); }
-    else if (agentTypeName == "Boi") { return new Grounded("Boi", QPixmap(":/images/agents/Boi.png"), 400, 2, 100, 1); }
-    else if (agentTypeName == "Eloi") { return new Grounded("Eloi", QPixmap(":/images/agents/Eloi.png"), 240, 2, 100, 2); }
-    else if (agentTypeName == "Kanar") { return new Grounded("Kanar", QPixmap(":/images/agents/Kanar.png"), 160, 2, 100, 2); }
-    else if (agentTypeName == "Elsa") { return new Grounded("Elsa", QPixmap(":/images/agents/Elsa.png"), 320, 2, 140, 2); }
-    else if (agentTypeName == "Karissa") { return new Grounded("Karissa", QPixmap(":/images/agents/Karissa.png"), 280, 2, 80, 2); }
-    else if (agentTypeName == "Sir_Philip") { return new Grounded("Sir_Philip", QPixmap(":/images/agents/Sir_Philip.png"), 400, 2, 100, 1); }
-    else if (agentTypeName == "Frost") { return new Grounded("Frost", QPixmap(":/images/agents/Frost.png"), 260, 2, 80, 2); }
-    else if (agentTypeName == "Tusk") { return new Grounded("Tusk", QPixmap(":/images/agents/Tusk.png"), 400, 2, 100, 1); }
+    else if (agentTypeName == "Sir_Lamorak") { return new Grounded("Sir_Lamorak", QPixmap(":/images/agents/Sir_Lamorak.png"), 320, 3, 110, 1, playerOwner); }
+    else if (agentTypeName == "Kabu") { return new Grounded("Kabu", QPixmap(":/images/agents/Kabu.png"), 400, 2, 120, 1, playerOwner); }
+    else if (agentTypeName == "Rajakal") { return new Grounded("Rajakal", QPixmap(":/images/agents/Rajakal.png"), 320, 2, 130, 1, playerOwner); }
+    else if (agentTypeName == "Salih") { return new Grounded("Salih", QPixmap(":/images/agents/Salih.png"), 400, 2, 80, 1, playerOwner); }
+    else if (agentTypeName == "Khan") { return new Grounded("Khan", QPixmap(":/images/agents/Khan.png"), 320, 2, 90, 1, playerOwner); }
+    else if (agentTypeName == "Boi") { return new Grounded("Boi", QPixmap(":/images/agents/Boi.png"), 400, 2, 100, 1, playerOwner); }
+    else if (agentTypeName == "Eloi") { return new Grounded("Eloi", QPixmap(":/images/agents/Eloi.png"), 240, 2, 100, 2, playerOwner); }
+    else if (agentTypeName == "Kanar") { return new Grounded("Kanar", QPixmap(":/images/agents/Kanar.png"), 160, 2, 100, 2, playerOwner); }
+    else if (agentTypeName == "Elsa") { return new Grounded("Elsa", QPixmap(":/images/agents/Elsa.png"), 320, 2, 140, 2, playerOwner); }
+    else if (agentTypeName == "Karissa") { return new Grounded("Karissa", QPixmap(":/images/agents/Karissa.png"), 280, 2, 80, 2, playerOwner); }
+    else if (agentTypeName == "Sir_Philip") { return new Grounded("Sir_Philip", QPixmap(":/images/agents/Sir_Philip.png"), 400, 2, 100, 1, playerOwner); }
+    else if (agentTypeName == "Frost") { return new Grounded("Frost", QPixmap(":/images/agents/Frost.png"), 260, 2, 80, 2, playerOwner); }
+    else if (agentTypeName == "Tusk") { return new Grounded("Tusk", QPixmap(":/images/agents/Tusk.png"), 400, 2, 100, 1, playerOwner); }
 
-    // Flying
-    else if (agentTypeName == "Rambu") { return new Flying("Rambu", QPixmap(":/images/agents/Rambu.png"), 320, 3, 120, 1); }
+    else if (agentTypeName == "Rambu") { return new Flying("Rambu", QPixmap(":/images/agents/Rambu.png"), 320, 3, 120, 1, playerOwner); }
 
-    // Floating
-    else if (agentTypeName == "Sabrina") { return new Floating("Sabrina", QPixmap(":/images/agents/Sabrina.png"), 320, 3, 100, 1); }
-    else if (agentTypeName == "Death") { return new Floating("Death", QPixmap(":/images/agents/Death.png"), 240, 3, 120, 2); }
+    else if (agentTypeName == "Sabrina") { return new Floating("Sabrina", QPixmap(":/images/agents/Sabrina.png"), 320, 3, 100, 1, playerOwner); }
+    else if (agentTypeName == "Death") { return new Floating("Death", QPixmap(":/images/agents/Death.png"), 240, 3, 120, 2, playerOwner); }
     else {
         qWarning() << "createAgentInstance: Unknown agent type requested:" << agentTypeName;
         return nullptr;
     }
 }
-
 
 void HexBoardWidget::paintEvent(QPaintEvent *)
 {
@@ -117,6 +114,13 @@ void HexBoardWidget::paintEvent(QPaintEvent *)
                 fillColor = QColor("#4FC3F7");
             else if (cell->terrain == TerrainType::Rock)
                 fillColor = QColor("#546E7A");
+
+            if (cell == m_selectedCell) {
+                fillColor = QColor("#FFFF00"); // زرد
+            }
+            if (std::find(m_reachableCells.begin(), m_reachableCells.end(), cell) != m_reachableCells.end()) {
+                fillColor = QColor("#00FF00"); // سبز
+            }
 
 
             painter.setBrush(fillColor);
@@ -213,10 +217,10 @@ void HexBoardWidget::dropEvent(QDropEvent *event)
                 isValidPlacement = true;
                 qDebug() << "HexBoardWidget: Valid placement for Player 2 agent in P2 zone.";
             } else {
-                qDebug() << "HexBoardWidget: Invalid owner zone. Dropped by P" << playerOwner << " on P" << targetCell->owner << " zone.";
+                qWarning() << "HexBoardWidget: Invalid owner zone. Dropped by P" << playerOwner << " on P" << targetCell->owner << " zone.";
             }
         } else {
-            qDebug() << "HexBoardWidget: Target cell IS ALREADY OCCUPIED by " << (targetCell->occupiedAgent->name());
+            qWarning() << "HexBoardWidget: Target cell IS ALREADY OCCUPIED by " << (targetCell->occupiedAgent->getOwner());
         }
 
         if (isValidPlacement) {
@@ -234,7 +238,7 @@ void HexBoardWidget::dropEvent(QDropEvent *event)
         }
 
     } else {
-        qDebug() << "HexBoardWidget: Dropped on invalid cell coordinates (targetCell is NULL).";
+        qWarning() << "HexBoardWidget: Dropped on invalid cell coordinates (targetCell is NULL).";
         event->ignore();
     }
 }
@@ -282,4 +286,37 @@ std::pair<int, int> HexBoardWidget::pointToCell(const QPointF &pt) const
     }
 
     return {-1, -1};
+}
+
+void HexBoardWidget::mousePressEvent(QMouseEvent *event) {
+    if (event->button() == Qt::LeftButton && m_gameState->getCurrentPhase() == GamePhase::Combat) {
+        auto [row, col] = pointToCell(event->position());
+        Cell* clickedCell = m_gameBoard->getCell(row, col);
+
+        if (!clickedCell) {
+            m_selectedCell = nullptr;
+            m_reachableCells.clear();
+            update();
+            return;
+        }
+
+        if (m_selectedCell && std::find(m_reachableCells.begin(), m_reachableCells.end(), clickedCell) != m_reachableCells.end()) {
+            qDebug() << "Moving agent from (" << m_selectedCell->row << "," << m_selectedCell->col << ") to (" << clickedCell->row << "," << clickedCell->col << ")";
+            emit moveAgentRequested(m_selectedCell->row, m_selectedCell->col, clickedCell->row, clickedCell->col);
+            m_selectedCell = nullptr;
+            m_reachableCells.clear();
+            update();
+        }
+        else if (clickedCell->occupiedAgent && clickedCell->occupiedAgent->getOwner() == m_gameState->getCurrentPlayer()) {
+            m_selectedCell = clickedCell;
+            m_reachableCells = m_gameBoard->getReachableCells(m_selectedCell, m_selectedCell->occupiedAgent->getMobility(), m_gameState->getCurrentPlayer());
+            qDebug() << "Agent selected at (" << row << "," << col << "). Reachable cells:" << m_reachableCells.size();
+            update();
+        }
+        else {
+            m_selectedCell = nullptr;
+            m_reachableCells.clear();
+            update();
+        }
+    }
 }

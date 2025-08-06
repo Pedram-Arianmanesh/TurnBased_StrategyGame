@@ -24,17 +24,21 @@ public:
 
 signals:
     void agentPlacedOnBoard(const QString& agentTypeName, int playerOwner);
+    void moveAgentRequested(int fromRow, int fromCol, int toRow, int toCol);
 
 protected:
     void paintEvent(QPaintEvent *event) override;
     void dragEnterEvent(QDragEnterEvent *event) override;
     void dropEvent(QDropEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
 
 private:
     GameBoard* m_gameBoard;
     GameState* m_gameState;
     std::pair<int, int> pointToCell(const QPointF &pt) const;
     Agent* createAgentInstance(const QString& agentTypeName, int playerOwner);
+    Cell* m_selectedCell = nullptr;
+    std::vector<Cell*> m_reachableCells;
 };
 
 #endif

@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QPointF>
 #include <utility>
+
 class GameBoard;
 class Cell;
 class Agent;
@@ -11,6 +12,7 @@ class Water_Walking;
 class Grounded;
 class Flying;
 class Floating;
+class GameState;
 
 class HexBoardWidget : public QWidget
 {
@@ -18,6 +20,7 @@ class HexBoardWidget : public QWidget
 
 public:
     explicit HexBoardWidget(GameBoard* gameBoard, QWidget *parent = nullptr);
+    void setGameState(GameState* gameState);
 
 signals:
     void agentPlacedOnBoard(const QString& agentTypeName, int playerOwner);
@@ -29,6 +32,7 @@ protected:
 
 private:
     GameBoard* m_gameBoard;
+    GameState* m_gameState;
     std::pair<int, int> pointToCell(const QPointF &pt) const;
     Agent* createAgentInstance(const QString& agentTypeName, int playerOwner);
 };

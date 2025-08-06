@@ -8,11 +8,10 @@ GameBoard::GameBoard(const Board& parsedBoard)
 }
 
 void GameBoard::setupNeighbors() {
-    for (int r = 0; r < m_cells.size(); ++r) {
-        for (int c = 0; c < m_cells[r].size(); ++c) {
+    for (size_t r = 0; r < m_cells.size(); ++r) {
+        for (size_t c = 0; c < m_cells[r].size(); ++c) {
             Cell* currentCell = &m_cells[r][c];
             currentCell->neighbors.clear();
-
 
             if (getCell(r, c + 1)) currentCell->neighbors.push_back(getCell(r, c + 1));
             if (getCell(r, c - 1)) currentCell->neighbors.push_back(getCell(r, c - 1));
@@ -33,8 +32,8 @@ void GameBoard::setupNeighbors() {
 }
 
 Cell* GameBoard::getCell(int row, int col) {
-    if (row >= 0 && row < m_cells.size()) {
-        if (col >= 0 && col < m_cells[row].size()) {
+    if (row >= 0 && (size_t)row < m_cells.size()) {
+        if (col >= 0 && (size_t)col < m_cells[row].size()) {
             return &m_cells[row][col];
         }
     }
@@ -89,9 +88,20 @@ void GameBoard::moveAgent(Agent* agent, int fromRow, int fromCol, int toRow, int
 
 }
 
+void GameBoard::clearStartZones() {
+    for (size_t r = 0; r < m_cells.size(); ++r) {
+        for (size_t c = 0; c < m_cells[r].size(); ++c) {
+            if (m_cells[r][c].owner != 0) {
+                m_cells[r][c].owner = 0;
+            }
+        }
+    }
+    qDebug() << "Start zones cleared. All cells are now Free territory.";
+}
+
 void GameBoard::resetBfsState() {
-    for (int r = 0; r < m_cells.size(); ++r) {
-        for (int c = 0; c < m_cells[r].size(); ++c) {
+    for (size_t r = 0; r < m_cells.size(); ++r) {
+        for (size_t c = 0; c < m_cells[r].size(); ++c) {
             m_cells[r][c].visited = false;
             m_cells[r][c].parent = nullptr;
             m_cells[r][c].distance = -1;

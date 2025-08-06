@@ -5,11 +5,15 @@
 #include <QString>
 #include <vector>
 #include <QList>
+#include <QLabel>
+
 class GameBoard;
 class HexBoardWidget;
 class Agent;
 class AgentCard;
 class QVBoxLayout;
+class GameState;
+
 class GamePage : public QWidget
 {
     Q_OBJECT
@@ -20,6 +24,8 @@ public:
 
 private slots:
     void handleAgentPlaced(const QString& agentTypeName, int playerOwner);
+    void updatePlayerLabels();
+    void updateBoardDisplay();
 
 private:
     void setupUI();
@@ -29,6 +35,7 @@ private:
 
     GameBoard* m_gameBoard;
     HexBoardWidget* m_boardWidget;
+    GameState* m_gameState;
 
     QVBoxLayout* m_player1AgentsLayout = nullptr;
     QVBoxLayout* m_player2AgentsLayout = nullptr;
@@ -38,6 +45,9 @@ private:
 
     std::vector<Agent*> m_player1AgentPrototypes;
     std::vector<Agent*> m_player2AgentPrototypes;
+
+    QLabel *m_player1Label;
+    QLabel *m_player2Label;
 };
 
 #endif

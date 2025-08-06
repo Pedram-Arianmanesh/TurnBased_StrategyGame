@@ -1,6 +1,7 @@
 #include "hexboardwidget.h"
 #include "logic/gameboard.h"
 #include "logic/cell.h"
+#include "logic/gamestate.h"
 #include <QPainter>
 #include <QPolygonF>
 #include <QDragEnterEvent>
@@ -12,11 +13,15 @@
 #include "logic/agent.h"
 
 HexBoardWidget::HexBoardWidget(GameBoard* gameBoard, QWidget *parent)
-    : QWidget(parent), m_gameBoard(gameBoard)
+    : QWidget(parent), m_gameBoard(gameBoard), m_gameState(nullptr)
 {
     setAcceptDrops(true);
     setMinimumSize(1280, 800);
     qDebug() << "HexBoardWidget created.";
+}
+
+void HexBoardWidget::setGameState(GameState* gameState) {
+    m_gameState = gameState;
 }
 
 Agent* HexBoardWidget::createAgentInstance(const QString& agentTypeName, int playerOwner) {
@@ -151,8 +156,8 @@ void HexBoardWidget::dragEnterEvent(QDragEnterEvent *event)
 void HexBoardWidget::dropEvent(QDropEvent *event)
 {
     qDebug() << "HexBoardWidget: dropEvent called.";
-    if (!m_gameBoard) {
-        qWarning() << "GameBoard is null in HexBoardWidget::dropEvent!";
+    if (!m_gameBoard || !m_gameState) {
+        qWarning() << "GameBoard or GameState is null in HexBoardWidget::dropEvent!";
         event->ignore();
         return;
     }
@@ -177,6 +182,18 @@ void HexBoardWidget::dropEvent(QDropEvent *event)
         stream >> agentTypeName >> playerOwner;
 
         qDebug() << "HexBoardWidget: Extracted agent type:" << agentTypeName << " and owner:" << playerOwner;
+
+        if (m_gameState->getCurrentPhase() != GamePhase::Deployment) {
+            qWarning() << "Can only place agents during deployment phase!";
+            event->ignore();
+            return;
+        }
+
+        if (m_gameState->getCurrentPlayer() != playerOwner) {
+            qWarning() << "It is not player" << playerOwner << "'s turn to place an agent.";
+            event->ignore();
+            return;
+        }
 
         Agent* newAgentInstance = createAgentInstance(agentTypeName, playerOwner);
         if (!newAgentInstance) {
@@ -210,7 +227,7 @@ void HexBoardWidget::dropEvent(QDropEvent *event)
             qDebug() << "HexBoardWidget: Agent placed successfully. Emitting agentPlacedOnBoard signal.";
             emit agentPlacedOnBoard(agentTypeName, playerOwner);
         } else {
-            qDebug() << "HexBoardWidget: Invalid placement for agent type" << agentTypeName << " at (" << row << "," << col << ") for player" << playerOwner;
+            qWarning() << "HexBoardWidget: Invalid placement for agent type" << agentTypeName << " at (" << row << "," << col << ") for player" << playerOwner;
             event->ignore();
             delete newAgentInstance;
             newAgentInstance = nullptr;

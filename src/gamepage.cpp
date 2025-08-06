@@ -3,6 +3,7 @@
 #include "agentcard.h"
 #include "hexboardwidget.h"
 #include "logic/gameboard.h"
+#include "logic/gamestate.h"
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QLabel>
@@ -19,10 +20,9 @@
 #include <ctime>
 #include "logic/agent.h"
 
-
 GamePage::GamePage(QWidget *parent, const QString &player1, const QString &player2)
     : QWidget(parent), m_player1(player1), m_player2(player2),
-    m_gameBoard(nullptr), m_boardWidget(nullptr)
+    m_gameBoard(nullptr), m_boardWidget(nullptr), m_gameState(nullptr)
 {
     setWindowTitle("Tactical Monsters - Game");
     resize(1920, 1080);
@@ -35,6 +35,7 @@ GamePage::~GamePage()
     qDebug() << "GamePage destructor called.";
     delete m_boardWidget;
     delete m_gameBoard;
+    delete m_gameState;
 
     for (Agent* agentPrototype : m_player1AgentPrototypes) {
         qDebug() << "Deleting Player 1 agent prototype:" << (agentPrototype ? agentPrototype->name() : "NULL Prototype");
@@ -80,6 +81,7 @@ void GamePage::setupUI()
 
     m_gameBoard = new GameBoard(boardData);
     qDebug() << "GamePage: GameBoard created and neighbors set up.";
+    m_gameState = new GameState(this);
 
     QHBoxLayout *mainLayout = new QHBoxLayout(this);
 
@@ -116,11 +118,11 @@ void GamePage::setupUI()
     allAgentPrototypes.push_back(new Floating("Sabrina", QPixmap(":/images/agents/Sabrina.png"), 320, 3, 100, 1));
     allAgentPrototypes.push_back(new Floating("Death", QPixmap(":/images/agents/Death.png"), 240, 3, 120, 2));
 
-    //Player 1
+    // Player 1
     QVBoxLayout *leftPanel = new QVBoxLayout(this);
-    QLabel *player1Label = new QLabel(m_player1 + " [RED]");
-    player1Label->setAlignment(Qt::AlignCenter);
-    player1Label->setStyleSheet("background-color: #F44336; color: white; font-weight: bold; font-size: 18px; padding: 10px; border-radius: 8px;");
+    m_player1Label = new QLabel(m_player1);
+    m_player1Label->setAlignment(Qt::AlignCenter);
+    m_player1Label->setStyleSheet("background-color: #F44336; color: white; font-weight: bold; font-size: 18px; padding: 10px; border-radius: 8px;");
 
     m_player1AgentsLayout = new QVBoxLayout;
     m_player1AgentsLayout->setAlignment(Qt::AlignHCenter);
@@ -147,21 +149,22 @@ void GamePage::setupUI()
     leftScrollArea->setMaximumWidth(320);
     leftScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-    leftPanel->addWidget(player1Label);
+    leftPanel->addWidget(m_player1Label);
     leftPanel->addWidget(leftScrollArea);
 
-    //Board
+
+    // Board
     m_boardWidget = new HexBoardWidget(m_gameBoard, this);
     m_boardWidget->setAcceptDrops(true);
     connect(m_boardWidget, &HexBoardWidget::agentPlacedOnBoard, this, &GamePage::handleAgentPlaced);
-
+    m_boardWidget->setGameState(m_gameState);
     qDebug() << "GamePage: HexBoardWidget::agentPlacedOnBoard signal is NOW connected for card removal.";
 
-    //Player 2
+    // Player 2
     QVBoxLayout *rightPanel = new QVBoxLayout(this);
-    QLabel *player2Label = new QLabel(m_player2 + " [BLUE]");
-    player2Label->setAlignment(Qt::AlignCenter);
-    player2Label->setStyleSheet("background-color: #2196F3; color: white; font-weight: bold; font-size: 18px; padding: 10px; border-radius: 8px;");
+    m_player2Label = new QLabel(m_player2);
+    m_player2Label->setAlignment(Qt::AlignCenter);
+    m_player2Label->setStyleSheet("background-color: #2196F3; color: white; font-weight: bold; font-size: 18px; padding: 10px; border-radius: 8px;");
 
     m_player2AgentsLayout = new QVBoxLayout;
     m_player2AgentsLayout->setAlignment(Qt::AlignHCenter);
@@ -188,7 +191,7 @@ void GamePage::setupUI()
     rightScrollArea->setMaximumWidth(320);
     rightScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-    rightPanel->addWidget(player2Label);
+    rightPanel->addWidget(m_player2Label);
     rightPanel->addWidget(rightScrollArea);
 
     mainLayout->addLayout(leftPanel, 3);
@@ -196,10 +199,21 @@ void GamePage::setupUI()
     mainLayout->addLayout(rightPanel, 3);
 
     setLayout(mainLayout);
+    updatePlayerLabels();
     qDebug() << "GamePage: setupUI finished.";
 }
 
 void GamePage::handleAgentPlaced(const QString& agentTypeName, int playerOwner) {
+    if (m_gameState->getCurrentPhase() != GamePhase::Deployment) {
+        qWarning() << "Attempted to place agent outside of deployment phase!";
+        return;
+    }
+
+    if (m_gameState->getCurrentPlayer() != playerOwner) {
+        qWarning() << "It's not player" << playerOwner << "'s turn to place an agent.";
+        return;
+    }
+
     qDebug() << "GamePage: Received agentPlacedOnBoard signal for agent:" << agentTypeName << " by player:" << playerOwner;
 
     QList<AgentCard*>* targetList = nullptr;
@@ -228,10 +242,36 @@ void GamePage::handleAgentPlaced(const QString& agentTypeName, int playerOwner) 
 
             targetList->removeOne(cardToRemove);
             qDebug() << "GamePage: AgentCard for" << agentTypeName << "removed successfully for player" << playerOwner;
+
+            m_gameState->agentPlaced(playerOwner);
+            updatePlayerLabels();
+            updateBoardDisplay();
+
+            if (m_gameState->getCurrentPhase() == GamePhase::Combat) {
+                m_gameBoard->clearStartZones();
+                m_boardWidget->update();
+            }
         } else {
             qWarning() << "GamePage: Could not find AgentCard for agent:" << agentTypeName << " in player" << playerOwner << " list.";
         }
     } else {
         qWarning() << "GamePage: Target list or layout not found for player" << playerOwner;
+    }
+}
+
+void GamePage::updatePlayerLabels() {
+    QString player1Text = QString("%1 (%2/5)").arg(m_player1).arg(m_gameState->getPlayerPlacedAgents(1));
+    QString player2Text = QString("%1 (%2/5)").arg(m_player2).arg(m_gameState->getPlayerPlacedAgents(2));
+
+    m_player1Label->setText(player1Text);
+    m_player2Label->setText(player2Text);
+
+    m_player1Label->setStyleSheet(m_gameState->getCurrentPlayer() == 1 ? "border: 3px solid white; border-radius: 8px; background-color: #F44336; color: white; font-weight: bold; font-size: 18px; padding: 10px;" : "border: 3px solid transparent; border-radius: 8px; background-color: #F44336; color: white; font-weight: bold; font-size: 18px; padding: 10px;");
+    m_player2Label->setStyleSheet(m_gameState->getCurrentPlayer() == 2 ? "border: 3px solid white; border-radius: 8px; background-color: #2196F3; color: white; font-weight: bold; font-size: 18px; padding: 10px;" : "border: 3px solid transparent; border-radius: 8px; background-color: #2196F3; color: white; font-weight: bold; font-size: 18px; padding: 10px;");
+}
+
+void GamePage::updateBoardDisplay() {
+    if (m_boardWidget) {
+        m_boardWidget->update();
     }
 }

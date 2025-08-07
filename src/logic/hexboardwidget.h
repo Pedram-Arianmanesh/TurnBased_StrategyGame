@@ -3,16 +3,17 @@
 
 #include <QWidget>
 #include <QPointF>
-#include <utility>
+#include <vector>
+#include <QQueue>
+#include "logic/cell.h"
 
 class GameBoard;
-class Cell;
-class Agent;
-class Water_Walking;
-class Grounded;
-class Flying;
-class Floating;
 class GameState;
+class Agent;
+class QDragEnterEvent;
+class QDropEvent;
+class QMouseEvent;
+class QPaintEvent;
 
 class HexBoardWidget : public QWidget
 {
@@ -21,10 +22,7 @@ class HexBoardWidget : public QWidget
 public:
     explicit HexBoardWidget(GameBoard* gameBoard, QWidget *parent = nullptr);
     void setGameState(GameState* gameState);
-
-signals:
-    void agentPlacedOnBoard(const QString& agentTypeName, int playerOwner);
-    void moveAgentRequested(int fromRow, int fromCol, int toRow, int toCol);
+    void updateBoardDisplay();
 
 protected:
     void paintEvent(QPaintEvent *event) override;
@@ -32,13 +30,23 @@ protected:
     void dropEvent(QDropEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
 
+signals:
+    void agentPlacedOnBoard(const QString& agentTypeName, int playerOwner);
+    void turnFinished();
+
 private:
-    GameBoard* m_gameBoard;
-    GameState* m_gameState;
     std::pair<int, int> pointToCell(const QPointF &pt) const;
     Agent* createAgentInstance(const QString& agentTypeName, int playerOwner);
+    std::vector<Cell*> getAttackableCells(Cell* startCell);
+    void attackAgent(Cell* attackerCell, Cell* defenderCell);
+    void handleAgentMove(Cell* fromCell, Cell* toCell);
+
+    GameBoard* m_gameBoard;
+    GameState* m_gameState;
+
     Cell* m_selectedCell = nullptr;
     std::vector<Cell*> m_reachableCells;
+    std::vector<Cell*> m_attackableCells;
 };
 
 #endif

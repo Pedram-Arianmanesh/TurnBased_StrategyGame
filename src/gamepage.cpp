@@ -75,7 +75,7 @@ void GamePage::setupUI()
     Board boardData = BoardParser::parseBoard(filePath);
     qDebug() << "GamePage: Board parsed. Rows:" << boardData.size();
     if (boardData.empty()) {
-        qWarning() << "❗ Board is empty. Check your map file path!";
+        qWarning() << "Board is empty. Check your map file path!";
         return;
     }
 
@@ -157,7 +157,7 @@ void GamePage::setupUI()
     m_boardWidget = new HexBoardWidget(m_gameBoard, this);
     m_boardWidget->setAcceptDrops(true);
     connect(m_boardWidget, &HexBoardWidget::agentPlacedOnBoard, this, &GamePage::handleAgentPlaced);
-    connect(m_boardWidget, &HexBoardWidget::moveAgentRequested, this, &GamePage::handleMoveAgentRequested);
+    connect(m_boardWidget, &HexBoardWidget::turnFinished, this, &GamePage::handleTurnFinished);
     m_boardWidget->setGameState(m_gameState);
     qDebug() << "GamePage: HexBoardWidget::agentPlacedOnBoard signal is NOW connected for card removal.";
 
@@ -274,29 +274,12 @@ void GamePage::updatePlayerLabels() {
 
 void GamePage::updateBoardDisplay() {
     if (m_boardWidget) {
-        m_boardWidget->update();
+        m_boardWidget->updateBoardDisplay();
     }
 }
 
-void GamePage::handleMoveAgentRequested(int fromRow, int fromCol, int toRow, int toCol) {
-    if (m_gameState->getCurrentPhase() != GamePhase::Combat) {
-        qWarning() << "Cannot move agents outside of combat phase!";
-        return;
-    }
-
-    Cell* fromCell = m_gameBoard->getCell(fromRow, fromCol);
-    if (!fromCell || !fromCell->occupiedAgent) {
-        qWarning() << "Invalid move request: no agent at start cell.";
-        return;
-    }
-
-    if (fromCell->occupiedAgent->getOwner() != m_gameState->getCurrentPlayer()) {
-        qWarning() << "It's not your turn to move this agent.";
-        return;
-    }
-
-    m_gameBoard->moveAgent(fromCell->occupiedAgent, fromRow, fromCol, toRow, toCol);
+void GamePage::handleTurnFinished() {
     m_gameState->nextTurn();
-    updateBoardDisplay();
     updatePlayerLabels();
+    updateBoardDisplay();
 }

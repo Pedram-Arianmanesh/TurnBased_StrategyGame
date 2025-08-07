@@ -3,52 +3,49 @@
 
 #include <QWidget>
 #include <QString>
-#include <vector>
 #include <QList>
-#include <QLabel>
+#include <vector>
 
 class GameBoard;
 class HexBoardWidget;
+class GameState;
 class Agent;
 class AgentCard;
+class QLabel;
 class QVBoxLayout;
-class GameState;
 
 class GamePage : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit GamePage(QWidget *parent = nullptr, const QString &player1 = "Player 1", const QString &player2 = "Player 2");
+    explicit GamePage(QWidget *parent = nullptr, const QString &player1 = "", const QString &player2 = "");
     ~GamePage();
 
 private slots:
     void handleAgentPlaced(const QString& agentTypeName, int playerOwner);
-    void updatePlayerLabels();
-    void updateBoardDisplay();
-    void handleMoveAgentRequested(int fromRow, int fromCol, int toRow, int toCol);
+    void handleTurnFinished();
 
 private:
     void setupUI();
+    void updatePlayerLabels();
+    void updateBoardDisplay();
 
     QString m_player1;
     QString m_player2;
-
     GameBoard* m_gameBoard;
     HexBoardWidget* m_boardWidget;
     GameState* m_gameState;
 
-    QVBoxLayout* m_player1AgentsLayout = nullptr;
-    QVBoxLayout* m_player2AgentsLayout = nullptr;
-
-    QList<AgentCard*> m_player1AgentCards;
-    QList<AgentCard*> m_player2AgentCards;
+    QLabel* m_player1Label;
+    QLabel* m_player2Label;
+    QVBoxLayout* m_player1AgentsLayout;
+    QVBoxLayout* m_player2AgentsLayout;
 
     std::vector<Agent*> m_player1AgentPrototypes;
     std::vector<Agent*> m_player2AgentPrototypes;
-
-    QLabel *m_player1Label;
-    QLabel *m_player2Label;
+    QList<AgentCard*> m_player1AgentCards;
+    QList<AgentCard*> m_player2AgentCards;
 };
 
 #endif

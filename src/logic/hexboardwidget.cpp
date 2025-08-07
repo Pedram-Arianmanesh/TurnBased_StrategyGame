@@ -13,6 +13,9 @@
 #include <QMouseEvent>
 #include "logic/agent.h"
 #include <algorithm>
+#include <QQueue>
+#include <cstdlib>
+#include <ctime>
 
 HexBoardWidget::HexBoardWidget(GameBoard* gameBoard, QWidget *parent)
     : QWidget(parent), m_gameBoard(gameBoard), m_gameState(nullptr)
@@ -24,6 +27,10 @@ HexBoardWidget::HexBoardWidget(GameBoard* gameBoard, QWidget *parent)
 
 void HexBoardWidget::setGameState(GameState* gameState) {
     m_gameState = gameState;
+}
+
+void HexBoardWidget::updateBoardDisplay() {
+    this->update();
 }
 
 Agent* HexBoardWidget::createAgentInstance(const QString& agentTypeName, int playerOwner) {
@@ -56,10 +63,9 @@ Agent* HexBoardWidget::createAgentInstance(const QString& agentTypeName, int pla
 
     else if (agentTypeName == "Sabrina") { return new Floating("Sabrina", QPixmap(":/images/agents/Sabrina.png"), 320, 3, 100, 1, playerOwner); }
     else if (agentTypeName == "Death") { return new Floating("Death", QPixmap(":/images/agents/Death.png"), 240, 3, 120, 2, playerOwner); }
-    else {
-        qWarning() << "createAgentInstance: Unknown agent type requested:" << agentTypeName;
-        return nullptr;
-    }
+
+    qWarning() << "createAgentInstance: Unknown agent type requested:" << agentTypeName;
+    return nullptr;
 }
 
 
@@ -83,7 +89,6 @@ void HexBoardWidget::paintEvent(QPaintEvent *)
     double totalCols = 5;
     double mapWidth = (totalCols - 1) * horizSpacing + hexWidth;
     double mapHeight = (totalRows - 1) * vertSpacing + hexHeight;
-
 
     double offsetX = (width() - mapWidth) / 2.0;
     double offsetY = (height() - mapHeight) / 2.0;
@@ -122,7 +127,9 @@ void HexBoardWidget::paintEvent(QPaintEvent *)
             if (std::find(m_reachableCells.begin(), m_reachableCells.end(), cell) != m_reachableCells.end()) {
                 fillColor = QColor("#00FF00");
             }
-
+            if (std::find(m_attackableCells.begin(), m_attackableCells.end(), cell) != m_attackableCells.end()) {
+                fillColor = QColor("#FF0000"); // Red for attackable cells
+            }
 
             painter.setBrush(fillColor);
             painter.setPen(Qt::black);
@@ -132,8 +139,6 @@ void HexBoardWidget::paintEvent(QPaintEvent *)
                 polygon << pt;
 
             painter.drawPolygon(polygon);
-
-
 
             if (cell->occupiedAgent) {
                 QPixmap agentIcon = cell->occupiedAgent->icon();
@@ -225,7 +230,7 @@ void HexBoardWidget::dropEvent(QDropEvent *event)
         if (isValidPlacement) {
             qDebug() << "HexBoardWidget: Attempting to place agent " << newAgentInstance->name() << " at (" << row << "," << col << ") in GameBoard.";
             m_gameBoard->placeAgent(newAgentInstance, row, col);
-            update();
+            updateBoardDisplay();
             event->acceptProposedAction();
             qDebug() << "HexBoardWidget: Agent placed successfully. Emitting agentPlacedOnBoard signal.";
             emit agentPlacedOnBoard(agentTypeName, playerOwner);
@@ -233,7 +238,6 @@ void HexBoardWidget::dropEvent(QDropEvent *event)
             qWarning() << "HexBoardWidget: Invalid placement for agent type" << agentTypeName << " at (" << row << "," << col << ") for player" << playerOwner;
             event->ignore();
             delete newAgentInstance;
-            newAgentInstance = nullptr;
         }
 
     } else {
@@ -261,7 +265,6 @@ std::pair<int, int> HexBoardWidget::pointToCell(const QPointF &pt) const
     double mapWidth = (totalCols - 1) * horizSpacing + hexWidth;
     double mapHeight = (totalRows - 1) * vertSpacing + hexHeight;
 
-
     double offsetX = (width() - mapWidth) / 2.0;
     double offsetY = (height() - mapHeight) / 2.0;
 
@@ -288,34 +291,171 @@ std::pair<int, int> HexBoardWidget::pointToCell(const QPointF &pt) const
 }
 
 void HexBoardWidget::mousePressEvent(QMouseEvent *event) {
-    if (event->button() == Qt::LeftButton && m_gameState->getCurrentPhase() == GamePhase::Combat) {
+    if (event->button() == Qt::LeftButton && m_gameState && m_gameState->getCurrentPhase() == GamePhase::Combat) {
         auto [row, col] = pointToCell(event->position());
         Cell* clickedCell = m_gameBoard->getCell(row, col);
 
         if (!clickedCell) {
             m_selectedCell = nullptr;
             m_reachableCells.clear();
+            m_attackableCells.clear();
             update();
             return;
         }
 
-        if (m_selectedCell && std::find(m_reachableCells.begin(), m_reachableCells.end(), clickedCell) != m_reachableCells.end()) {
-            qDebug() << "Moving agent from (" << m_selectedCell->row << "," << m_selectedCell->col << ") to (" << clickedCell->row << "," << clickedCell->col << ")";
-            emit moveAgentRequested(m_selectedCell->row, m_selectedCell->col, clickedCell->row, clickedCell->col);
-            m_selectedCell = nullptr;
-            m_reachableCells.clear();
-            update();
+        if (m_selectedCell) {
+            if (std::find(m_reachableCells.begin(), m_reachableCells.end(), clickedCell) != m_reachableCells.end()) {
+                qDebug() << "Moving agent from (" << m_selectedCell->row << "," << m_selectedCell->col << ") to (" << clickedCell->row << "," << clickedCell->col << ")";
+                handleAgentMove(m_selectedCell, clickedCell);
+            }
+            else if (std::find(m_attackableCells.begin(), m_attackableCells.end(), clickedCell) != m_attackableCells.end()) {
+                qDebug() << "Attacking agent at (" << clickedCell->row << "," << clickedCell->col << ") from (" << m_selectedCell->row << "," << m_selectedCell->col << ")";
+                attackAgent(m_selectedCell, clickedCell);
+            }
+            else {
+                m_selectedCell = nullptr;
+                m_reachableCells.clear();
+                m_attackableCells.clear();
+                update();
+            }
         }
         else if (clickedCell->occupiedAgent && clickedCell->occupiedAgent->getOwner() == m_gameState->getCurrentPlayer()) {
             m_selectedCell = clickedCell;
             m_reachableCells = m_gameBoard->getReachableCells(m_selectedCell, m_selectedCell->occupiedAgent->getMobility(), m_gameState->getCurrentPlayer());
-            qDebug() << "Agent selected at (" << row << "," << col << "). Reachable cells:" << m_reachableCells.size();
+            m_attackableCells = getAttackableCells(m_selectedCell);
+            qDebug() << "Agent selected at (" << row << "," << col << "). Reachable cells:" << m_reachableCells.size() << " Attackable cells:" << m_attackableCells.size();
             update();
         }
         else {
             m_selectedCell = nullptr;
             m_reachableCells.clear();
+            m_attackableCells.clear();
             update();
         }
     }
+}
+
+void HexBoardWidget::handleAgentMove(Cell* fromCell, Cell* toCell) {
+    if (!fromCell || !toCell || !fromCell->occupiedAgent) {
+        qWarning() << "Invalid move request: fromCell or toCell is null or fromCell has no agent.";
+        return;
+    }
+    m_gameBoard->moveAgent(fromCell->occupiedAgent, fromCell->row, fromCell->col, toCell->row, toCell->col);
+
+    m_selectedCell = nullptr;
+    m_reachableCells.clear();
+    m_attackableCells.clear();
+    updateBoardDisplay();
+
+    emit turnFinished();
+}
+
+std::vector<Cell*> HexBoardWidget::getAttackableCells(Cell* startCell) {
+    if (!startCell || !startCell->occupiedAgent) {
+        return {};
+    }
+
+    std::vector<Cell*> attackableCells;
+    QQueue<Cell*> q;
+    m_gameBoard->resetBfsState();
+
+    startCell->distance = 0;
+    startCell->visited = true;
+    q.enqueue(startCell);
+
+    while (!q.isEmpty()) {
+        Cell* currentCell = q.dequeue();
+
+        if (currentCell->distance >= startCell->occupiedAgent->getAttackRange()) {
+            continue;
+        }
+
+        for (Cell* neighbor : currentCell->neighbors) {
+            if (!neighbor->visited) {
+                neighbor->visited = true;
+                neighbor->distance = currentCell->distance + 1;
+                neighbor->parent = currentCell;
+                q.enqueue(neighbor);
+            }
+        }
+    }
+
+    for (size_t r = 0; r < m_gameBoard->getRows(); ++r) {
+        for (size_t c = 0; c < m_gameBoard->getCols(r); ++c) {
+            Cell* cell = m_gameBoard->getCell(r, c);
+            if (cell && cell->occupiedAgent && cell->occupiedAgent->getOwner() != startCell->occupiedAgent->getOwner()) {
+                if (cell->distance != -1 && cell->distance <= startCell->occupiedAgent->getAttackRange()) {
+                    attackableCells.push_back(cell);
+                }
+            }
+        }
+    }
+    return attackableCells;
+}
+
+void HexBoardWidget::attackAgent(Cell* attackerCell, Cell* defenderCell) {
+    if (!attackerCell || !defenderCell || !attackerCell->occupiedAgent || !defenderCell->occupiedAgent) {
+        qWarning() << "Invalid attack request: attacker or defender not found.";
+        return;
+    }
+
+    Agent* attacker = attackerCell->occupiedAgent;
+    Agent* defender = defenderCell->occupiedAgent;
+
+    defender->setHp(defender->getHp() - attacker->getDamage());
+    qDebug() << attacker->name() << "attacks" << defender->name() << ". Defender HP is now:" << defender->getHp();
+
+    attacker->setHp(attacker->getHp() - (defender->getDamage() / 2));
+    qDebug() << defender->name() << "counter-attacks. Attacker HP is now:" << attacker->getHp();
+
+    if (defender->getHp() <= 0) {
+        m_gameBoard->removeAgent(defenderCell->row, defenderCell->col);
+        qDebug() << defender->name() << "was defeated.";
+    }
+    if (attacker->getHp() <= 0) {
+        m_gameBoard->removeAgent(attackerCell->row, attackerCell->col);
+        qDebug() << attacker->name() << "was defeated.";
+
+        m_selectedCell = nullptr;
+        m_reachableCells.clear();
+        m_attackableCells.clear();
+        updateBoardDisplay();
+
+        emit turnFinished();
+        return;
+    }
+
+    std::vector<Cell*> neighbors = attackerCell->neighbors;
+    std::vector<Cell*> validRandomMoveCells;
+
+    for (Cell* neighbor : neighbors) {
+        if (!neighbor->occupiedAgent) {
+            bool canStand = false;
+            if (attacker->type() == "Grounded" && neighbor->terrain == TerrainType::Free) canStand = true;
+            else if (attacker->type() == "Water_Walking" && (neighbor->terrain == TerrainType::Free || neighbor->terrain == TerrainType::Water)) canStand = true;
+            else if (attacker->type() == "Flying" && neighbor->terrain == TerrainType::Free) canStand = true;
+            else if (attacker->type() == "Floating" && (neighbor->terrain == TerrainType::Free || neighbor->terrain == TerrainType::Water || neighbor->terrain == TerrainType::Rock)) canStand = true;
+
+            if (canStand) {
+                validRandomMoveCells.push_back(neighbor);
+            }
+        }
+    }
+
+    if (!validRandomMoveCells.empty()) {
+        std::srand(std::time(nullptr));
+        int randomIndex = std::rand() % validRandomMoveCells.size();
+        Cell* randomMoveCell = validRandomMoveCells[randomIndex];
+        m_gameBoard->moveAgent(attacker, attackerCell->row, attackerCell->col, randomMoveCell->row, randomMoveCell->col);
+        qDebug() << attacker->name() << "randomly moved to (" << randomMoveCell->row << "," << randomMoveCell->col << ")";
+    } else {
+        qWarning() << "Attacker cannot randomly move after attack.";
+    }
+
+    m_selectedCell = nullptr;
+    m_reachableCells.clear();
+    m_attackableCells.clear();
+    updateBoardDisplay();
+
+    emit turnFinished();
 }

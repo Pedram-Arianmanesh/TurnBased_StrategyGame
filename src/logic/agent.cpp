@@ -2,7 +2,9 @@
 
 Agent::Agent(const QString &name, const QString &type, const QPixmap &icon, int h, int m, int d, int a, int o)
     : m_name(name), m_type(type), m_icon(icon),
-    hp(h), mobility(m), damage(d), attack_range(a), owner(o) {}
+    hp(h), mobility(m), damage(d), attack_range(a), owner(o),
+    walk_water(false), walk_rock(false), stand_water(false), stand_rock(false)
+{}
 
 QString Agent::name() const {
     return m_name;
@@ -18,6 +20,10 @@ QPixmap Agent::icon() const {
 
 int Agent::getHp() const {
     return hp;
+}
+
+void Agent::setHp(int h) {
+    hp = h;
 }
 
 int Agent::getMobility() const {
@@ -37,15 +43,15 @@ int Agent::getOwner() const {
 }
 
 Grounded::Grounded(const QString &name, const QPixmap &icon, int h, int m, int d, int a, int o)
-    : Agent(name, "Grounded", icon, h, m, d, a, o){
+    : Agent(name, "Grounded", icon, h, m, d, a, o) {
     walk_water = false;
     walk_rock = false;
     stand_water = false;
     stand_rock = false;
 }
 
-Water_Walking::Water_Walking(const QString &name, const QPixmap &icon, int h, int m, int d, int a, int o):
-    Agent(name, "Water_Walking", icon, h, m, d, a, o){
+Water_Walking::Water_Walking(const QString &name, const QPixmap &icon, int h, int m, int d, int a, int o)
+    : Agent(name, "Water_Walking", icon, h, m, d, a, o) {
     walk_water = true;
     walk_rock = false;
     stand_water = true;
@@ -53,7 +59,7 @@ Water_Walking::Water_Walking(const QString &name, const QPixmap &icon, int h, in
 }
 
 Flying::Flying(const QString &name, const QPixmap &icon, int h, int m, int d, int a, int o)
-    : Agent(name, "Flying", icon, h, m, d, a, o){
+    : Agent(name, "Flying", icon, h, m, d, a, o) {
     walk_water = true;
     walk_rock = true;
     stand_water = false;
@@ -61,7 +67,7 @@ Flying::Flying(const QString &name, const QPixmap &icon, int h, int m, int d, in
 }
 
 Floating::Floating(const QString &name, const QPixmap &icon, int h, int m, int d, int a, int o)
-    : Agent(name, "Floating", icon, h, m, d, a, o){
+    : Agent(name, "Floating", icon, h, m, d, a, o) {
     walk_water = true;
     walk_rock = true;
     stand_water = true;

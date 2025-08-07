@@ -14,24 +14,25 @@ void GameBoard::setupNeighbors() {
             Cell* currentCell = &m_cells[r][c];
             currentCell->neighbors.clear();
 
-            if (getCell(r - 1, c)) currentCell->neighbors.push_back(getCell(r - 1, c));
-            if (getCell(r + 1, c)) currentCell->neighbors.push_back(getCell(r + 1, c));
+            // up & down
+            if (getCell(r - 2, c)) currentCell->neighbors.push_back(getCell(r - 2, c));
+            if (getCell(r + 2, c)) currentCell->neighbors.push_back(getCell(r + 2, c));
 
-            if (r % 2 == 0) {
-                if (getCell(r, c - 1)) currentCell->neighbors.push_back(getCell(r, c - 1));
-                if (getCell(r, c + 1)) currentCell->neighbors.push_back(getCell(r, c + 1));
+            // lefs & rights
+            if (r % 2 == 0) { // even r
+                if (getCell(r - 1, c)) currentCell->neighbors.push_back(getCell(r - 1, c));
                 if (getCell(r - 1, c - 1)) currentCell->neighbors.push_back(getCell(r - 1, c - 1));
+                if (getCell(r + 1, c)) currentCell->neighbors.push_back(getCell(r + 1, c));
                 if (getCell(r + 1, c - 1)) currentCell->neighbors.push_back(getCell(r + 1, c - 1));
-            } else {
-                if (getCell(r, c - 1)) currentCell->neighbors.push_back(getCell(r, c - 1));
-                if (getCell(r, c + 1)) currentCell->neighbors.push_back(getCell(r, c + 1));
+            } else {          // odd r
                 if (getCell(r - 1, c + 1)) currentCell->neighbors.push_back(getCell(r - 1, c + 1));
+                if (getCell(r - 1, c)) currentCell->neighbors.push_back(getCell(r - 1, c));
                 if (getCell(r + 1, c + 1)) currentCell->neighbors.push_back(getCell(r + 1, c + 1));
+                if (getCell(r + 1, c)) currentCell->neighbors.push_back(getCell(r + 1, c));
             }
         }
     }
 }
-
 
 
 Cell* GameBoard::getCell(int row, int col) {

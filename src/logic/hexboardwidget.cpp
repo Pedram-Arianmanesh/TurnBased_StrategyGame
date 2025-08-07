@@ -62,6 +62,7 @@ Agent* HexBoardWidget::createAgentInstance(const QString& agentTypeName, int pla
     }
 }
 
+
 void HexBoardWidget::paintEvent(QPaintEvent *)
 {
     if (!m_gameBoard) {
@@ -116,10 +117,10 @@ void HexBoardWidget::paintEvent(QPaintEvent *)
                 fillColor = QColor("#546E7A");
 
             if (cell == m_selectedCell) {
-                fillColor = QColor("#FFFF00"); // زرد
+                fillColor = QColor("#FFFF00");
             }
             if (std::find(m_reachableCells.begin(), m_reachableCells.end(), cell) != m_reachableCells.end()) {
-                fillColor = QColor("#00FF00"); // سبز
+                fillColor = QColor("#00FF00");
             }
 
 
@@ -132,9 +133,7 @@ void HexBoardWidget::paintEvent(QPaintEvent *)
 
             painter.drawPolygon(polygon);
 
-            QString label = (cell->owner > 0) ? "P" + QString::number(cell->owner) : "";
-            painter.setPen(Qt::white);
-            painter.drawText(polygon.boundingRect(), Qt::AlignCenter, label);
+
 
             if (cell->occupiedAgent) {
                 QPixmap agentIcon = cell->occupiedAgent->icon();

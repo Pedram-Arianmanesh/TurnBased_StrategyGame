@@ -2,7 +2,7 @@
 
 Agent::Agent(const QString &name, const QString &type, const QPixmap &icon, int h, int m, int d, int a, int o)
     : m_name(name), m_type(type), m_icon(icon),
-    hp(h), mobility(m), damage(d), attack_range(a), owner(o),
+    hp(h), initialHp(h), mobility(m), damage(d), attack_range(a), owner(o),
     walk_water(false), walk_rock(false), stand_water(false), stand_rock(false)
 {}
 
@@ -24,6 +24,10 @@ int Agent::getHp() const {
 
 void Agent::setHp(int h) {
     hp = h;
+}
+
+int Agent::getInitialHp() const {
+    return initialHp;
 }
 
 int Agent::getMobility() const {

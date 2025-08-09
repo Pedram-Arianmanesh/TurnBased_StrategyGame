@@ -13,6 +13,7 @@ public:
     QPixmap icon() const;
     int getHp() const;
     void setHp(int h);
+    int getInitialHp() const; // New function to get initial HP
     int getMobility() const;
     int getDamage() const;
     int getAttackRange() const;
@@ -28,6 +29,7 @@ protected:
     QString m_type;
     QPixmap m_icon;
     int hp;
+    int initialHp; // New member variable
     int mobility;
     int damage;
     int attack_range;

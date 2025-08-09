@@ -16,6 +16,7 @@
 #include <QLayoutItem>
 #include <QDataStream>
 #include <QScrollArea>
+#include <QMessageBox>
 #include <cstdlib>
 #include <ctime>
 #include "logic/agent.h"
@@ -282,4 +283,18 @@ void GamePage::handleTurnFinished() {
     m_gameState->nextTurn();
     updatePlayerLabels();
     updateBoardDisplay();
+
+    int player1Agents = m_gameBoard->countAgents(1);
+    int player2Agents = m_gameBoard->countAgents(2);
+
+    if (player1Agents == 0 && player2Agents == 0) {
+        QMessageBox::information(this, "Game Over", "It's a draw!");
+        this->close();
+    } else if (player1Agents == 0) {
+        QMessageBox::information(this, "Game Over", QString("%1 wins!").arg(m_player2));
+        this->close();
+    } else if (player2Agents == 0) {
+        QMessageBox::information(this, "Game Over", QString("%1 wins!").arg(m_player1));
+        this->close();
+    }
 }

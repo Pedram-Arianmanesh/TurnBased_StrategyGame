@@ -59,14 +59,11 @@ void GameBoard::placeAgent(Agent* agent, int row, int col) {
 
 void GameBoard::removeAgent(int row, int col) {
     Cell* cell = getCell(row, col);
-    if (cell) {
-        if (!cell->occupiedAgent) {
-            qWarning() << "تلاش برای حذف ایجنت از سلول خالی در (" << row << "," << col << ")";
-            return;
-        }
+    if (cell && cell->occupiedAgent) {
+        delete cell->occupiedAgent;
         cell->occupiedAgent = nullptr;
     } else {
-        qWarning() << "تلاش برای حذف ایجنت از سلول نامعتبر در (" << row << "," << col << ")";
+        qWarning() << "تلاش برای حذف ایجنت از سلول خالی یا نامعتبر در (" << row << "," << col << ")";
     }
 }
 
@@ -155,4 +152,16 @@ std::vector<Cell*> GameBoard::getReachableCells(Cell* startCell, int mobility, i
     }
 
     return reachableCells;
+}
+
+int GameBoard::countAgents(int playerOwner) const {
+    int count = 0;
+    for (const auto& row : m_cells) {
+        for (const auto& cell : row) {
+            if (cell.occupiedAgent && cell.occupiedAgent->getOwner() == playerOwner) {
+                count++;
+            }
+        }
+    }
+    return count;
 }

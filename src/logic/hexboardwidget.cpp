@@ -128,7 +128,7 @@ void HexBoardWidget::paintEvent(QPaintEvent *)
                 fillColor = QColor("#00FF00");
             }
             if (std::find(m_attackableCells.begin(), m_attackableCells.end(), cell) != m_attackableCells.end()) {
-                fillColor = QColor("#FF0000"); // Red for attackable cells
+                fillColor = QColor("#FF0000");
             }
 
             painter.setBrush(fillColor);
@@ -145,6 +145,22 @@ void HexBoardWidget::paintEvent(QPaintEvent *)
                 if (!agentIcon.isNull()) {
                     painter.drawPixmap(QRectF(x - hexSize / 1.5, y - hexSize / 1.5, hexSize * 1.5, hexSize * 1.5),
                                        agentIcon, agentIcon.rect());
+
+
+                    double maxHp = cell->occupiedAgent->getInitialHp();
+                    double hpRatio = static_cast<double>(cell->occupiedAgent->getHp()) / maxHp;
+                    int barWidth = 60;
+                    int barHeight = 6;
+                    int barX = x - barWidth / 2;
+                    int barY = y - hexSize;
+
+                    painter.setPen(Qt::NoPen);
+                    painter.setBrush(Qt::black);
+                    painter.drawRect(barX, barY, barWidth, barHeight);
+
+                    QColor hpColor = QColor::fromRgb(255 * (1 - hpRatio), 255 * hpRatio, 0);
+                    painter.setBrush(hpColor);
+                    painter.drawRect(barX, barY, barWidth * hpRatio, barHeight);
                 }
             }
         }
@@ -402,54 +418,68 @@ void HexBoardWidget::attackAgent(Cell* attackerCell, Cell* defenderCell) {
     Agent* attacker = attackerCell->occupiedAgent;
     Agent* defender = defenderCell->occupiedAgent;
 
+    // Store original positions for a potential random move later
+    int attackerOldRow = attackerCell->row;
+    int attackerOldCol = attackerCell->col;
+    int defenderOldRow = defenderCell->row;
+    int defenderOldCol = defenderCell->col;
+
+    // 1. Attacker deals damage
     defender->setHp(defender->getHp() - attacker->getDamage());
     qDebug() << attacker->name() << "attacks" << defender->name() << ". Defender HP is now:" << defender->getHp();
 
+    // 2. Defender counter-attacks
     attacker->setHp(attacker->getHp() - (defender->getDamage() / 2));
     qDebug() << defender->name() << "counter-attacks. Attacker HP is now:" << attacker->getHp();
 
-    if (defender->getHp() <= 0) {
-        m_gameBoard->removeAgent(defenderCell->row, defenderCell->col);
-        qDebug() << defender->name() << "was defeated.";
-    }
-    if (attacker->getHp() <= 0) {
-        m_gameBoard->removeAgent(attackerCell->row, attackerCell->col);
-        qDebug() << attacker->name() << "was defeated.";
+    // Check if agents died. Get fresh pointers in case of removal.
+    bool attackerDied = attacker->getHp() <= 0;
+    bool defenderDied = defender->getHp() <= 0;
 
-        m_selectedCell = nullptr;
-        m_reachableCells.clear();
-        m_attackableCells.clear();
-        updateBoardDisplay();
-
-        emit turnFinished();
-        return;
+    if (defenderDied) {
+        m_gameBoard->removeAgent(defenderOldRow, defenderOldCol);
+        if (m_selectedCell == defenderCell) m_selectedCell = nullptr;
+        defenderCell = nullptr;
     }
 
-    std::vector<Cell*> neighbors = attackerCell->neighbors;
-    std::vector<Cell*> validRandomMoveCells;
+    if (attackerDied) {
+        m_gameBoard->removeAgent(attackerOldRow, attackerOldCol);
+        if (m_selectedCell == attackerCell) m_selectedCell = nullptr;
+        attackerCell = nullptr;
+    }
 
-    for (Cell* neighbor : neighbors) {
-        if (!neighbor->occupiedAgent) {
-            bool canStand = false;
-            if (attacker->type() == "Grounded" && neighbor->terrain == TerrainType::Free) canStand = true;
-            else if (attacker->type() == "Water_Walking" && (neighbor->terrain == TerrainType::Free || neighbor->terrain == TerrainType::Water)) canStand = true;
-            else if (attacker->type() == "Flying" && neighbor->terrain == TerrainType::Free) canStand = true;
-            else if (attacker->type() == "Floating" && (neighbor->terrain == TerrainType::Free || neighbor->terrain == TerrainType::Water || neighbor->terrain == TerrainType::Rock)) canStand = true;
+    if (!attackerDied) {
+        Cell* currentAttackerCell = m_gameBoard->getCell(attackerOldRow, attackerOldCol);
+        if (currentAttackerCell && currentAttackerCell->occupiedAgent) {
+            std::vector<Cell*> neighbors = currentAttackerCell->neighbors;
+            std::vector<Cell*> validRandomMoveCells;
 
-            if (canStand) {
-                validRandomMoveCells.push_back(neighbor);
+            for (Cell* neighbor : neighbors) {
+                if (!neighbor->occupiedAgent) {
+                    bool canStand = false;
+                    if (attacker->type() == "Grounded" && neighbor->terrain == TerrainType::Free) canStand = true;
+                    else if (attacker->type() == "Water_Walking" && (neighbor->terrain == TerrainType::Free || neighbor->terrain == TerrainType::Water)) canStand = true;
+                    else if (attacker->type() == "Flying" && neighbor->terrain == TerrainType::Free) canStand = true;
+                    else if (attacker->type() == "Floating" && (neighbor->terrain == TerrainType::Free || neighbor->terrain == TerrainType::Water || neighbor->terrain == TerrainType::Rock)) canStand = true;
+
+                    if (canStand) {
+                        validRandomMoveCells.push_back(neighbor);
+                    }
+                }
             }
-        }
-    }
 
-    if (!validRandomMoveCells.empty()) {
-        std::srand(std::time(nullptr));
-        int randomIndex = std::rand() % validRandomMoveCells.size();
-        Cell* randomMoveCell = validRandomMoveCells[randomIndex];
-        m_gameBoard->moveAgent(attacker, attackerCell->row, attackerCell->col, randomMoveCell->row, randomMoveCell->col);
-        qDebug() << attacker->name() << "randomly moved to (" << randomMoveCell->row << "," << randomMoveCell->col << ")";
-    } else {
-        qWarning() << "Attacker cannot randomly move after attack.";
+            if (!validRandomMoveCells.empty()) {
+                std::srand(std::time(nullptr));
+                int randomIndex = std::rand() % validRandomMoveCells.size();
+                Cell* randomMoveCell = validRandomMoveCells[randomIndex];
+                m_gameBoard->moveAgent(attacker, attackerOldRow, attackerOldCol, randomMoveCell->row, randomMoveCell->col);
+                qDebug() << attacker->name() << "randomly moved to (" << randomMoveCell->row << "," << randomMoveCell->col << ")";
+            } else {
+                qWarning() << "Attacker cannot randomly move after attack.";
+            }
+        } else {
+            qWarning() << "Attacker was removed, no random move possible.";
+        }
     }
 
     m_selectedCell = nullptr;

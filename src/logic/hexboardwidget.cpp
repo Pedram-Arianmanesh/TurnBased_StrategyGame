@@ -2,6 +2,8 @@
 #include "logic/gameboard.h"
 #include "logic/cell.h"
 #include "logic/gamestate.h"
+#include "logic/agent.h"
+
 #include <QPainter>
 #include <QPolygonF>
 #include <QDragEnterEvent>
@@ -11,11 +13,13 @@
 #include <QDebug>
 #include <QDataStream>
 #include <QMouseEvent>
-#include "logic/agent.h"
-#include <algorithm>
+#include <QPropertyAnimation>
+#include <QSequentialAnimationGroup>
+#include <QEasingCurve>
 #include <QQueue>
 #include <cstdlib>
 #include <ctime>
+#include <algorithm>
 
 HexBoardWidget::HexBoardWidget(GameBoard* gameBoard, QWidget *parent)
     : QWidget(parent), m_gameBoard(gameBoard), m_gameState(nullptr)
@@ -68,9 +72,79 @@ Agent* HexBoardWidget::createAgentInstance(const QString& agentTypeName, int pla
     return nullptr;
 }
 
+QPointF HexBoardWidget::animPos() const {
+    return m_animPos;
+}
 
-void HexBoardWidget::paintEvent(QPaintEvent *)
-{
+void HexBoardWidget::setAnimPos(const QPointF& pos) {
+    m_animPos = pos;
+    update();
+}
+
+void HexBoardWidget::animateAgentMove(Agent* agent, const QPointF& start, const QPointF& end, std::function<void()> onFinished) {
+    if (!agent) {
+        if (onFinished) onFinished();
+        return;
+    }
+
+    m_animAgent = agent;
+    m_animPos = start;
+    m_isAnimating = true;
+
+    QPropertyAnimation* anim = new QPropertyAnimation(this, "animPos");
+    anim->setDuration(300);
+    anim->setStartValue(start);
+    anim->setEndValue(end);
+    anim->setEasingCurve(QEasingCurve::InOutQuad);
+
+    connect(anim, &QPropertyAnimation::finished, this, [=]() {
+        m_isAnimating = false;
+        m_animAgent = nullptr;
+        if (onFinished) onFinished();
+    });
+
+    anim->start(QAbstractAnimation::DeleteWhenStopped);
+}
+
+void HexBoardWidget::animateAttack(Agent* attacker, const QPointF& start, const QPointF& target, std::function<void()> onFinished) {
+    if (!attacker) {
+        if (onFinished) onFinished();
+        return;
+    }
+
+    m_animAgent = attacker;
+    m_animPos = start;
+    m_isAnimating = true;
+
+    QPointF midPoint = start + (target - start) * 0.2;
+
+    QSequentialAnimationGroup* seq = new QSequentialAnimationGroup(this);
+
+    QPropertyAnimation* forward = new QPropertyAnimation(this, "animPos");
+    forward->setDuration(100);
+    forward->setStartValue(start);
+    forward->setEndValue(midPoint);
+    forward->setEasingCurve(QEasingCurve::OutQuad);
+
+    QPropertyAnimation* back = new QPropertyAnimation(this, "animPos");
+    back->setDuration(100);
+    back->setStartValue(midPoint);
+    back->setEndValue(start);
+    back->setEasingCurve(QEasingCurve::InQuad);
+
+    seq->addAnimation(forward);
+    seq->addAnimation(back);
+
+    connect(seq, &QSequentialAnimationGroup::finished, this, [=]() {
+        m_isAnimating = false;
+        m_animAgent = nullptr;
+        if (onFinished) onFinished();
+    });
+
+    seq->start(QAbstractAnimation::DeleteWhenStopped);
+}
+
+void HexBoardWidget::paintEvent(QPaintEvent *) {
     if (!m_gameBoard) {
         qWarning() << "GameBoard is null in HexBoardWidget::paintEvent!";
         return;
@@ -141,29 +215,54 @@ void HexBoardWidget::paintEvent(QPaintEvent *)
             painter.drawPolygon(polygon);
 
             if (cell->occupiedAgent) {
-                QPixmap agentIcon = cell->occupiedAgent->icon();
-                if (!agentIcon.isNull()) {
-                    painter.drawPixmap(QRectF(x - hexSize / 1.5, y - hexSize / 1.5, hexSize * 1.5, hexSize * 1.5),
-                                       agentIcon, agentIcon.rect());
-
+                if (!(m_isAnimating && cell->occupiedAgent == m_animAgent)) {
+                    QPixmap agentIcon = cell->occupiedAgent->icon();
+                    if (!agentIcon.isNull()) {
+                        painter.drawPixmap(QRectF(x - hexSize / 1.5, y - hexSize / 1.5, hexSize * 1.5, hexSize * 1.5),
+                                           agentIcon, agentIcon.rect());
+                    }
 
                     double maxHp = cell->occupiedAgent->getInitialHp();
                     double hpRatio = static_cast<double>(cell->occupiedAgent->getHp()) / maxHp;
                     int barWidth = 60;
                     int barHeight = 6;
-                    int barX = x - barWidth / 2;
-                    int barY = y - hexSize;
+                    int barX = static_cast<int>(x - barWidth / 2);
+                    int barY = static_cast<int>(y - hexSize);
 
                     painter.setPen(Qt::NoPen);
                     painter.setBrush(Qt::black);
                     painter.drawRect(barX, barY, barWidth, barHeight);
 
-                    QColor hpColor = QColor::fromRgb(255 * (1 - hpRatio), 255 * hpRatio, 0);
+                    QColor hpColor = QColor::fromRgb(static_cast<int>(255 * (1 - hpRatio)), static_cast<int>(255 * hpRatio), 0);
                     painter.setBrush(hpColor);
-                    painter.drawRect(barX, barY, barWidth * hpRatio, barHeight);
+                    painter.drawRect(barX, barY, static_cast<int>(barWidth * hpRatio), barHeight);
                 }
             }
         }
+    }
+
+    if (m_isAnimating && m_animAgent) {
+        double hexSize = 48.0;
+        QPixmap agentIcon = m_animAgent->icon();
+        if (!agentIcon.isNull()) {
+            painter.drawPixmap(QRectF(m_animPos.x() - hexSize / 1.5, m_animPos.y() - hexSize / 1.5,
+                                      hexSize * 1.5, hexSize * 1.5),
+                               agentIcon, agentIcon.rect());
+        }
+
+        double maxHp = m_animAgent->getInitialHp();
+        double hpRatio = static_cast<double>(m_animAgent->getHp()) / maxHp;
+        int barWidth = 60;
+        int barHeight = 6;
+        int barX = static_cast<int>(m_animPos.x() - barWidth / 2);
+        int barY = static_cast<int>(m_animPos.y() - 48.0);
+
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(Qt::black);
+        painter.drawRect(barX, barY, barWidth, barHeight);
+        QColor hpColor = QColor::fromRgb(static_cast<int>(255 * (1 - hpRatio)), static_cast<int>(255 * hpRatio), 0);
+        painter.setBrush(hpColor);
+        painter.drawRect(barX, barY, static_cast<int>(barWidth * hpRatio), barHeight);
     }
 }
 
@@ -307,6 +406,10 @@ std::pair<int, int> HexBoardWidget::pointToCell(const QPointF &pt) const
 }
 
 void HexBoardWidget::mousePressEvent(QMouseEvent *event) {
+    if (m_isAnimating) {
+        return;
+    }
+
     if (event->button() == Qt::LeftButton && m_gameState && m_gameState->getCurrentPhase() == GamePhase::Combat) {
         auto [row, col] = pointToCell(event->position());
         Cell* clickedCell = m_gameBoard->getCell(row, col);
@@ -356,14 +459,21 @@ void HexBoardWidget::handleAgentMove(Cell* fromCell, Cell* toCell) {
         qWarning() << "Invalid move request: fromCell or toCell is null or fromCell has no agent.";
         return;
     }
-    m_gameBoard->moveAgent(fromCell->occupiedAgent, fromCell->row, fromCell->col, toCell->row, toCell->col);
 
-    m_selectedCell = nullptr;
-    m_reachableCells.clear();
-    m_attackableCells.clear();
-    updateBoardDisplay();
+    QPointF start = cellCenter(fromCell);
+    QPointF end = cellCenter(toCell);
+    Agent* movingAgent = fromCell->occupiedAgent;
 
-    emit turnFinished();
+    animateAgentMove(movingAgent, start, end, [=]() {
+        m_gameBoard->moveAgent(movingAgent, fromCell->row, fromCell->col, toCell->row, toCell->col);
+
+        m_selectedCell = nullptr;
+        m_reachableCells.clear();
+        m_attackableCells.clear();
+        updateBoardDisplay();
+
+        emit turnFinished();
+    });
 }
 
 std::vector<Cell*> HexBoardWidget::getAttackableCells(Cell* startCell) {
@@ -417,75 +527,107 @@ void HexBoardWidget::attackAgent(Cell* attackerCell, Cell* defenderCell) {
 
     Agent* attacker = attackerCell->occupiedAgent;
     Agent* defender = defenderCell->occupiedAgent;
-
-    // Store original positions for a potential random move later
     int attackerOldRow = attackerCell->row;
     int attackerOldCol = attackerCell->col;
     int defenderOldRow = defenderCell->row;
     int defenderOldCol = defenderCell->col;
 
-    // 1. Attacker deals damage
-    defender->setHp(defender->getHp() - attacker->getDamage());
-    qDebug() << attacker->name() << "attacks" << defender->name() << ". Defender HP is now:" << defender->getHp();
+    QPointF start = cellCenter(attackerCell);
+    QPointF target = cellCenter(defenderCell);
 
-    // 2. Defender counter-attacks
-    attacker->setHp(attacker->getHp() - (defender->getDamage() / 2));
-    qDebug() << defender->name() << "counter-attacks. Attacker HP is now:" << attacker->getHp();
+    animateAttack(attacker, start, target, [=]() {
+        if (!attacker || !defender) {
+            qWarning() << "Attacker or defender pointer became null before applying attack logic.";
+            return;
+        }
 
-    // Check if agents died. Get fresh pointers in case of removal.
-    bool attackerDied = attacker->getHp() <= 0;
-    bool defenderDied = defender->getHp() <= 0;
+        defender->setHp(defender->getHp() - attacker->getDamage());
+        qDebug() << attacker->name() << "attacks" << defender->name() << ". Defender HP is now:" << defender->getHp();
 
-    if (defenderDied) {
-        m_gameBoard->removeAgent(defenderOldRow, defenderOldCol);
-        if (m_selectedCell == defenderCell) m_selectedCell = nullptr;
-        defenderCell = nullptr;
-    }
+        attacker->setHp(attacker->getHp() - (defender->getDamage() / 2));
+        qDebug() << defender->name() << "counter-attacks. Attacker HP is now:" << attacker->getHp();
 
-    if (attackerDied) {
-        m_gameBoard->removeAgent(attackerOldRow, attackerOldCol);
-        if (m_selectedCell == attackerCell) m_selectedCell = nullptr;
-        attackerCell = nullptr;
-    }
+        bool attackerDied = attacker->getHp() <= 0;
+        bool defenderDied = defender->getHp() <= 0;
 
-    if (!attackerDied) {
-        Cell* currentAttackerCell = m_gameBoard->getCell(attackerOldRow, attackerOldCol);
-        if (currentAttackerCell && currentAttackerCell->occupiedAgent) {
-            std::vector<Cell*> neighbors = currentAttackerCell->neighbors;
-            std::vector<Cell*> validRandomMoveCells;
+        if (defenderDied) {
+            m_gameBoard->removeAgent(defenderOldRow, defenderOldCol);
+        }
 
-            for (Cell* neighbor : neighbors) {
-                if (!neighbor->occupiedAgent) {
-                    bool canStand = false;
-                    if (attacker->type() == "Grounded" && neighbor->terrain == TerrainType::Free) canStand = true;
-                    else if (attacker->type() == "Water_Walking" && (neighbor->terrain == TerrainType::Free || neighbor->terrain == TerrainType::Water)) canStand = true;
-                    else if (attacker->type() == "Flying" && neighbor->terrain == TerrainType::Free) canStand = true;
-                    else if (attacker->type() == "Floating" && (neighbor->terrain == TerrainType::Free || neighbor->terrain == TerrainType::Water || neighbor->terrain == TerrainType::Rock)) canStand = true;
+        if (attackerDied) {
+            m_gameBoard->removeAgent(attackerOldRow, attackerOldCol);
+        }
 
-                    if (canStand) {
-                        validRandomMoveCells.push_back(neighbor);
+        if (!attackerDied) {
+            Cell* currentAttackerCell = m_gameBoard->getCell(attackerOldRow, attackerOldCol);
+            if (currentAttackerCell && currentAttackerCell->occupiedAgent) {
+                std::vector<Cell*> neighbors = currentAttackerCell->neighbors;
+                std::vector<Cell*> validRandomMoveCells;
+
+                for (Cell* neighbor : neighbors) {
+                    if (!neighbor->occupiedAgent) {
+                        bool canStand = false;
+                        if (attacker->type() == "Grounded" && neighbor->terrain == TerrainType::Free) canStand = true;
+                        else if (attacker->type() == "Water_Walking" && (neighbor->terrain == TerrainType::Free || neighbor->terrain == TerrainType::Water)) canStand = true;
+                        else if (attacker->type() == "Flying" && neighbor->terrain == TerrainType::Free) canStand = true;
+                        else if (attacker->type() == "Floating" && (neighbor->terrain == TerrainType::Free || neighbor->terrain == TerrainType::Water || neighbor->terrain == TerrainType::Rock)) canStand = true;
+
+                        if (canStand) {
+                            validRandomMoveCells.push_back(neighbor);
+                        }
                     }
                 }
-            }
 
-            if (!validRandomMoveCells.empty()) {
-                std::srand(std::time(nullptr));
-                int randomIndex = std::rand() % validRandomMoveCells.size();
-                Cell* randomMoveCell = validRandomMoveCells[randomIndex];
-                m_gameBoard->moveAgent(attacker, attackerOldRow, attackerOldCol, randomMoveCell->row, randomMoveCell->col);
-                qDebug() << attacker->name() << "randomly moved to (" << randomMoveCell->row << "," << randomMoveCell->col << ")";
+                if (!validRandomMoveCells.empty()) {
+                    std::srand(static_cast<unsigned int>(std::time(nullptr)));
+                    int randomIndex = std::rand() % validRandomMoveCells.size();
+                    Cell* randomMoveCell = validRandomMoveCells[randomIndex];
+
+                    QPointF startPos = cellCenter(currentAttackerCell);
+                    QPointF endPos = cellCenter(randomMoveCell);
+                    Agent* animAgentCopy = attacker;
+                    animateAgentMove(animAgentCopy, startPos, endPos, [=]() {
+                        m_gameBoard->moveAgent(attacker, attackerOldRow, attackerOldCol, randomMoveCell->row, randomMoveCell->col);
+                        updateBoardDisplay();
+                    });
+                } else {
+                    qWarning() << "Attacker cannot randomly move after attack.";
+                }
             } else {
-                qWarning() << "Attacker cannot randomly move after attack.";
+                qWarning() << "Attacker was removed, no random move possible.";
             }
-        } else {
-            qWarning() << "Attacker was removed, no random move possible.";
         }
-    }
 
-    m_selectedCell = nullptr;
-    m_reachableCells.clear();
-    m_attackableCells.clear();
-    updateBoardDisplay();
+        m_selectedCell = nullptr;
+        m_reachableCells.clear();
+        m_attackableCells.clear();
+        updateBoardDisplay();
 
-    emit turnFinished();
+        emit turnFinished();
+    });
+}
+
+QPointF HexBoardWidget::cellCenter(Cell* cell) const {
+    if (!m_gameBoard || !cell) return QPointF(-1, -1);
+
+    double hexSize = 48.0;
+    double hexWidth = 2 * hexSize;
+    double hexHeight = std::sqrt(3) * hexSize;
+    double horizSpacing = hexWidth * 1.5;
+    double vertSpacing = hexHeight * 0.5;
+
+    double totalRows = m_gameBoard->getRows();
+    double totalCols = 5;
+    double mapWidth = (totalCols - 1) * horizSpacing + hexWidth;
+    double mapHeight = (totalRows - 1) * vertSpacing + hexHeight;
+
+    double offsetX = (width() - mapWidth) / 2.0;
+    double offsetY = (height() - mapHeight) / 2.0;
+
+    double x = cell->col * horizSpacing + offsetX;
+    if (cell->row % 2 == 1)
+        x += horizSpacing / 2.0;
+    double y = cell->row * vertSpacing + offsetY;
+
+    return QPointF(x, y);
 }

@@ -80,4 +80,4 @@ The project is fully functional and meets all core requirements of both phases. 
 
 ## License
 
-This project is licensed under the [GPL3 License](https://www.gnu.org/licenses/gpl-3.0.html).
+This project is licensed under the GPL3 License.

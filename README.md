@@ -76,7 +76,7 @@ The project is fully functional and meets all core requirements of both phases. 
 
 ## ✒️ Author
 
-  * **Your Name** - [Pedram Arianmanesh](https://www.google.com/search?q=https://github.com/Pedram-Arianmanesh)
+ [Pedram Arianmanesh](https://www.google.com/search?q=https://github.com/Pedram-Arianmanesh)
 
 ## License
 

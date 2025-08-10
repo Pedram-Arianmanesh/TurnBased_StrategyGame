@@ -1,3 +1,4 @@
+// کد اصلاح شده در فایل agentcard.cpp
 #include "agentcard.h"
 #include <QDebug>
 #include <QPixmap>
@@ -25,6 +26,11 @@ AgentCard::AgentCard(Agent* agentPrototype, int playerOwner, QWidget *parent)
         nameLabel->setAlignment(Qt::AlignCenter);
         nameLabel->setStyleSheet("font-weight: bold; font-size: 14px; margin-top: 5px; color: black;");
         mainLayout->addWidget(nameLabel);
+
+        QLabel *typeLabel = new QLabel(m_agentPrototype->type());
+        typeLabel->setAlignment(Qt::AlignCenter);
+        typeLabel->setStyleSheet("font-size: 12px; color: black;");
+        mainLayout->addWidget(typeLabel);
 
         QHBoxLayout *statsLayout1 = new QHBoxLayout;
         statsLayout1->setContentsMargins(0,0,0,0);

@@ -287,14 +287,35 @@ void GamePage::handleTurnFinished() {
     int player1Agents = m_gameBoard->countAgents(1);
     int player2Agents = m_gameBoard->countAgents(2);
 
+    QString title = "Game Over";
+    QString message;
+    QString style;
+
     if (player1Agents == 0 && player2Agents == 0) {
-        QMessageBox::information(this, "Game Over", "It's a draw!");
-        this->close();
-    } else if (player1Agents == 0) {
-        QMessageBox::information(this, "Game Over", QString("%1 wins!").arg(m_player2));
-        this->close();
-    } else if (player2Agents == 0) {
-        QMessageBox::information(this, "Game Over", QString("%1 wins!").arg(m_player1));
-        this->close();
+        message = "🤝 It's a draw!";
+        style = "background-color: #222; color: white; font-size: 16px;";
     }
+    else if (player1Agents == 0) {
+        message = QString("🏆 %1 wins!").arg(m_player2);
+        style = "background-color: #0059b3; color: white; font-size: 16px;";
+    }
+    else if (player2Agents == 0) {
+        message = QString("🏆 %1 wins!").arg(m_player1);
+        style = "background-color: #b30000; color: white; font-size: 16px;";
+    } else {
+        return;
+    }
+
+    QMessageBox msgBox;
+    msgBox.setWindowTitle(title);
+    msgBox.setText(message);
+    msgBox.setStyleSheet(QString(
+                             "QMessageBox { %1 border-radius: 10px; padding: 15px; } "
+                             "QLabel { color: white; font-weight: bold; font-size: 16px; } "
+                             "QPushButton { background-color: white; color: black; padding: 6px; border-radius: 6px; } "
+                             "QPushButton:hover { background-color: lightgray; }"
+                             ).arg(style));
+
+    msgBox.exec();
+    this->close();
 }
